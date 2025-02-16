@@ -1,7 +1,10 @@
-package model;
+ package model;
+
+import Utilities.Validation;
+
 
 public class User {
-    private int userID;
+    private String userID;
     private String firstName;
     private String lastName;
     private String userName;
@@ -12,24 +15,28 @@ public class User {
     public User() {
     }
 
-    public User(int userID, String firstName, String lastName, String userName, String email, String password, String role) {
-        this.userID = userID;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.userName = userName;
-        this.email = email;
+    public User(String userID, String firstName, String lastName, String userName, String email, String password, String role) {
+        setUserID(userID);
+        setFirstName(firstName);
+        setLastName(lastName);
+        setUserName(userName);
+        setEmail(email);
         this.password = password;
         this.role = role;
     }
 
     // Getters and setters
 
-    public int getUserID() {
+    public String getUserID() {
         return userID;
     }
 
-    public void setUserID(int userID) {
-        this.userID = userID;
+    public void setUserID(String userID) {
+        if(Validation.checkRegex(userID, "^[A-Za-z0-9]+$")){
+            
+        }else{
+            this.userID = "Unexpected";
+        }
     }
 
     public String getFirstName() {
@@ -37,7 +44,11 @@ public class User {
     }
 
     public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        if(Validation.checkRegex(firstName, "^[A-Za-z]+([-' ][A-Za-z]+)*$")){
+            this.firstName = firstName;
+        }else{
+            this.firstName = "Unexpected";
+        }
     }
 
     public String getLastName() {
@@ -45,7 +56,11 @@ public class User {
     }
 
     public void setLastName(String lastName) {
-        this.lastName = lastName;
+        if(Validation.checkRegex(lastName, "^[A-Za-z]+([-' ][A-Za-z]+)*$")){
+            this.lastName = lastName;
+        }else{
+            this.lastName = "Unexpected";
+        }
     }
 
     public String getUserName() {
@@ -53,7 +68,11 @@ public class User {
     }
 
     public void setUserName(String userName) {
-        this.userName = userName;
+        if(Validation.checkRegex(lastName, "^[A-Za-z0-9!@#$%^&*()_+=[\\]{}|;:'\",.<>/?\\-]+$")){
+            this.userName = userName;
+        }else{
+            this.userName = "Unexpected";
+        }
     }
 
     public String getEmail() {
@@ -61,7 +80,11 @@ public class User {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        if(Validation.checkRegex(lastName, "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")){
+            this.email = email;
+        }else{
+            this.email = "Unexpected";
+        }
     }
 
     public String getPassword() {
@@ -82,6 +105,6 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" + "userID=" + userID + ", firstName=" + firstName + ", lastName=" + lastName + ", userName=" + userName + ", email=" + email + ", password=" + password + ", role=" + role + '}';
+        return String.format("%s, %s, %s, %s, %s, %s, %s", getUserID(), getFirstName(), getLastName(), getUserName(), getEmail(), getPassword(), getRole());
     }
 }
