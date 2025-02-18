@@ -19,7 +19,21 @@ public class Task {
     private String assignedTo;
   
     // Constructor
+    
+    public Task() {
+    }
 
+    public Task(String taskId, String taskName, String description, String status, int dueDate, String projectId, String assignedTo) {
+        this.taskId = taskId;
+        this.taskName = taskName;
+        this.description = description;
+        this.status = status;
+        this.dueDate = dueDate;
+        this.projectId = projectId;
+        this.assignedTo = assignedTo;
+    }
+    
+    // Getter & Setter
     public String getTaskId() {
         return taskId;
     }

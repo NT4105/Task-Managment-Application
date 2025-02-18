@@ -22,6 +22,9 @@ public class Project {
     private String manageId;
     
     // Constructor
+    
+    public Project() {
+    }
 
     public Project(String projectId, String projectName, String description, List<Task> tasks, int startDate, int endDate, String manageId) {
         this.projectId = projectId;
