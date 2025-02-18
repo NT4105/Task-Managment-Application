@@ -27,4 +27,12 @@ public class JDBCUtil {
         }
         return con;
     }
+
+    public static void closeConnection(Connection con) {
+        try {
+            con.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(JDBCUtil.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

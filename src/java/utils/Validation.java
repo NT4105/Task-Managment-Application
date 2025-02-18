@@ -31,6 +31,12 @@ public class Validation {
             System.out.println("Username cannot be empty.");
             return false;
         }
+
+        if (checkSpace(username)) {
+            System.out.println("Username cannot contain spaces.");
+            return false;
+        }
+
         if (username.length() < 6 || username.length() > 20) {
             System.out.println("Username must be between 6 and 20 characters.");
             return false;
@@ -47,6 +53,12 @@ public class Validation {
             System.out.println("Email cannot be empty.");
             return false;
         }
+
+        if (checkSpace(email)) {
+            System.out.println("Email cannot contain spaces.");
+            return false;
+        }
+
         if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
             System.out.println("Invalid email format.");
             return false;
