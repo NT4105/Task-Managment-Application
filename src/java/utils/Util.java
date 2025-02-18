@@ -1,0 +1,41 @@
+package utils;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+public class Util {
+
+    /*
+     *
+     * encryptPassword use for encrypting password before save to db
+     * encryptPassword use for ecrypting id before assgin to cookie.Value();
+     */
+    public static String encryptPassword(String password) {
+        if (password == null) {
+            // Xử lý trường hợp password là null
+            return null;
+        }
+
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            byte[] hashBytes = messageDigest.digest(password.getBytes());
+
+            // Chuyển đổi byte array thành định dạng hex
+            StringBuilder hexString = new StringBuilder();
+            for (byte hashByte : hashBytes) {
+                String hex = Integer.toHexString(0xff & hashByte);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            // Xử lý ngoại lệ nếu thuật toán không được hỗ trợ
+            return null;
+        }
+
+    }
+}
