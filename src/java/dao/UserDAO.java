@@ -6,6 +6,7 @@
 package dao;
 
 import model.User;
+import model.enums.UserRole;
 import utils.JDBCUtil;
 import utils.Util;
 import java.sql.Connection;
@@ -26,32 +27,47 @@ public class UserDAO {
     }
 
     public int insert(User user) {
-        if (checkDuplicateEmail(user.getEmail()) && checkDuplicatePhone(user.getPhone())) {
+        if (!checkDuplicateEmail(user.getEmail()) || !checkDuplicatePhone(user.getPhone())) {
             return 0;
         }
 
         int result = 0;
+        Connection con = null;
+        PreparedStatement pst = null;
 
         try {
-            Connection con = JDBCUtil.getConnection();
-            String sql = "INSERT INTO user(UserId, firstName, lastName, dob, phone, email, password, role) "
-                    + "VALUES(MD5(UUID()), ?, ?, ?, ?, ?, ?, ?)";
-            PreparedStatement pst = con.prepareStatement(sql);
-            pst.setString(1, user.getFirstName());
-            pst.setString(2, user.getLastName());
-            pst.setDate(3, user.getDob());
-            pst.setString(4, user.getPhone());
-            pst.setString(5, user.getEmail());
-            pst.setString(6, Util.encryptPassword(user.getPassword())); // mã hóa mật khẩu trước khi đưa vào db
-            pst.setString(7, user.getRole());
+            con = JDBCUtil.getConnection();
+            String sql = "INSERT INTO user(UserId, firstName, lastName, userName, dob, phone, email, password, role) "
+                    + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            pst = con.prepareStatement(sql);
+
+            // Generate UUID for userId
+            String userId = java.util.UUID.randomUUID().toString();
+
+            pst.setString(1, userId);
+            pst.setString(2, user.getFirstName());
+            pst.setString(3, user.getLastName());
+            pst.setString(4, user.getUserName());
+            pst.setDate(5, user.getDob());
+            pst.setString(6, user.getPhone());
+            pst.setString(7, user.getEmail());
+            pst.setString(8, Util.encryptPassword(user.getPassword()));
+            pst.setString(9, user.getRole().toString());
 
             result = pst.executeUpdate();
-            System.out.println("Sign up successful!!!");
-            JDBCUtil.closeConnection(con);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pst != null)
+                    pst.close();
+                if (con != null)
+                    JDBCUtil.closeConnection(con);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
         return result;
     }
 
@@ -109,7 +125,8 @@ public class UserDAO {
                 String password = rs.getString("password");
                 String role = rs.getString("role");
 
-                User user = new User(id, firstName, lastName, userName, dob, phone, email, password, role);
+                User user = new User(id, firstName, lastName, userName, dob, phone, email, password,
+                        UserRole.fromString(role));
                 res.add(user);
             }
             JDBCUtil.closeConnection(con);
@@ -139,7 +156,8 @@ public class UserDAO {
                 String password = rs.getString("password");
                 String role = rs.getString("role");
 
-                result = new User(userId, firstName, lastName, userName, dob, phone, email, password, role);
+                result = new User(userId, firstName, lastName, userName, dob, phone, email, password,
+                        UserRole.fromString(role));
             }
             JDBCUtil.closeConnection(con);
         } catch (Exception e) {
@@ -171,7 +189,8 @@ public class UserDAO {
                 String password = rs.getString("password");
                 String role = rs.getString("role");
 
-                User user = new User(userId, firstName, lastName, userName, dob, phone, email, password, role);
+                User user = new User(userId, firstName, lastName, userName, dob, phone, email, password,
+                        UserRole.fromString(role));
                 res.add(user);
             }
 
@@ -234,5 +253,49 @@ public class UserDAO {
             }
         }
         return true;
+    }
+
+    public boolean updateField(String userId, String fieldName, String value) {
+        boolean result = false;
+        try {
+            Connection con = JDBCUtil.getConnection();
+            String sql = "UPDATE user SET " + fieldName + "=? WHERE UserId=?";
+            PreparedStatement pst = con.prepareStatement(sql);
+            pst.setString(1, value);
+            pst.setString(2, userId);
+
+            result = pst.executeUpdate() > 0;
+            JDBCUtil.closeConnection(con);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    // Specific update methods
+    public boolean updateFirstName(String userId, String firstName) {
+        return updateField(userId, "firstName", firstName);
+    }
+
+    public boolean updateLastName(String userId, String lastName) {
+        return updateField(userId, "lastName", lastName);
+    }
+
+    public boolean updateEmail(String userId, String email) {
+        return updateField(userId, "email", email);
+    }
+
+    public boolean updatePhone(String userId, String phone) {
+        return updateField(userId, "phone", phone);
+    }
+
+    public boolean updatePassword(String userId, String encryptedPassword) {
+        return updateField(userId, "password", encryptedPassword);
+    }
+
+    // Add method to check if username exists
+    public boolean checkDuplicateUsername(String username) {
+        ArrayList<User> users = selectAll();
+        return users.stream().noneMatch(user -> username.equals(user.getUserName()));
     }
 }
