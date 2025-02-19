@@ -1,5 +1,6 @@
 package model;
 
+import model.enums.UserRole;
 import java.sql.Date;
 
 public class User {
@@ -11,12 +12,13 @@ public class User {
     private String phone;
     private String email;
     private String password;
-    private String role;
+    private UserRole role;
 
     public User() {
     }
 
-    public User(String firstName, String lastName, String userName, Date dob, String phone, String email, String password, String role) {
+    public User(String firstName, String lastName, String userName, Date dob, String phone, String email,
+            String password, UserRole role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;
@@ -26,10 +28,9 @@ public class User {
         this.password = password;
         this.role = role;
     }
-    
-    
+
     public User(String userID, String firstName, String lastName, String userName, Date dob, String phone, String email,
-            String password, String role) {
+            String password, UserRole role) {
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -105,11 +106,11 @@ public class User {
         this.password = password;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(UserRole role) {
         this.role = role;
     }
 

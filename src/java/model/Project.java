@@ -1,39 +1,31 @@
-// src/java/model/Project.java
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package model;
 
+import java.sql.Date;
 import java.util.List;
 
-/**
- *
- * @author ACER
- */
 public class Project {
     private String projectId;
     private String projectName;
     private String description;
     private List<Task> tasks;
-    private int startDate;
-    private int endDate;
-    private String manageId;
-    
+    private Date startDate;
+    private Date endDate;
+    private String managerId;
+
     // Constructor
-    
+
     public Project() {
     }
 
-    public Project(String projectId, String projectName, String description, List<Task> tasks, int startDate, int endDate, String manageId) {
+    public Project(String projectId, String projectName, String description, List<Task> tasks, Date startDate,
+            Date endDate, String managerId) {
         this.projectId = projectId;
         this.projectName = projectName;
         this.description = description;
         this.tasks = tasks;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.manageId = manageId;
+        this.managerId = managerId;
     }
 
     public String getProjectId() {
@@ -68,34 +60,35 @@ public class Project {
         this.tasks = tasks;
     }
 
-    public int getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(int startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public int getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(int endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
-    public String getManageId() {
-        return manageId;
+    public String getManagerId() {
+        return managerId;
     }
 
-    public void setManageId(String manageId) {
-        this.manageId = manageId;
+    public void setManagerId(String managerId) {
+        this.managerId = managerId;
     }
 
     @Override
     public String toString() {
-        return "Project{" + "projectId=" + projectId + ", projectName=" + projectName + ", description=" + description + ", tasks=" + tasks + ", startDate=" + startDate + ", endDate=" + endDate + ", manageId=" + manageId + '}';
+        return "Project{" + "projectId=" + projectId + ", projectName=" + projectName + ", description=" + description
+                + ", tasks=" + tasks + ", startDate=" + startDate + ", endDate=" + endDate + ", managerId=" + managerId
+                + '}';
     }
-    
-    
+
 }
