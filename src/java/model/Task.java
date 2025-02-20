@@ -4,36 +4,48 @@ import model.enums.TaskStatus;
 import java.sql.Date;
 
 public class Task {
-    private String taskId;
+    private String taskID;
+    private String projectID;
     private String taskName;
     private String description;
     private TaskStatus status;
     private Date dueDate;
-    private String projectId;
     private String assignedTo;
+    private Date createdAt;
+    private Date updatedAt;
 
     // Constructor
     public Task() {
     }
 
-    public Task(String taskId, String taskName, String description, TaskStatus status,
-            Date dueDate, String projectId, String assignedTo) {
-        this.taskId = taskId;
+    public Task(String taskID, String projectID, String taskName, String description,
+            TaskStatus status, Date dueDate, String assignedTo, Date createdAt, Date updatedAt) {
+        this.taskID = taskID;
+        this.projectID = projectID;
         this.taskName = taskName;
         this.description = description;
         this.status = status;
         this.dueDate = dueDate;
-        this.projectId = projectId;
         this.assignedTo = assignedTo;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getter & Setter
     public String getTaskId() {
-        return taskId;
+        return taskID;
     }
 
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
+    public void setTaskId(String taskID) {
+        this.taskID = taskID;
+    }
+
+    public String getProjectId() {
+        return projectID;
+    }
+
+    public void setProjectId(String projectID) {
+        this.projectID = projectID;
     }
 
     public String getTaskName() {
@@ -68,14 +80,6 @@ public class Task {
         this.dueDate = dueDate;
     }
 
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
     public String getAssignedTo() {
         return assignedTo;
     }
@@ -84,10 +88,28 @@ public class Task {
         this.assignedTo = assignedTo;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     @Override
     public String toString() {
-        return "Task{" + "taskId=" + taskId + ", taskName=" + taskName + ", description=" + description + ", status="
-                + status + ", dueDate=" + dueDate + ", projectId=" + projectId + ", assignedTo=" + assignedTo + '}';
+        return "Task{" + "taskID=" + taskID + ", projectID=" + projectID + ", taskName=" + taskName + ", description="
+                + description + ", status="
+                + status + ", dueDate=" + dueDate + ", assignedTo=" + assignedTo + ", createdAt=" + createdAt
+                + ", updatedAt=" + updatedAt + '}';
     }
 
 }

@@ -4,36 +4,44 @@ import java.sql.Date;
 import java.util.List;
 
 public class Project {
-    private String projectId;
+    private String projectID;
     private String projectName;
     private String description;
     private List<Task> tasks;
     private Date startDate;
     private Date endDate;
     private String managerId;
+    private int totalTasks;
+    private int completedTasks;
+    private Date createdAt;
+    private Date updatedAt;
 
     // Constructor
 
     public Project() {
     }
 
-    public Project(String projectId, String projectName, String description, List<Task> tasks, Date startDate,
-            Date endDate, String managerId) {
-        this.projectId = projectId;
+    public Project(String projectID, String projectName, String description, List<Task> tasks, Date startDate,
+            Date endDate, String managerId, int totalTasks, int completedTasks, Date createdAt, Date updatedAt) {
+        this.projectID = projectID;
         this.projectName = projectName;
         this.description = description;
         this.tasks = tasks;
         this.startDate = startDate;
         this.endDate = endDate;
         this.managerId = managerId;
+        this.totalTasks = totalTasks;
+        this.completedTasks = completedTasks;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    public String getProjectId() {
-        return projectId;
+    public String getprojectID() {
+        return projectID;
     }
 
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
+    public void setprojectID(String projectID) {
+        this.projectID = projectID;
     }
 
     public String getProjectName() {
@@ -84,11 +92,44 @@ public class Project {
         this.managerId = managerId;
     }
 
+    public int getTotalTasks() {
+        return totalTasks;
+    }
+
+    public void setTotalTasks(int totalTasks) {
+        this.totalTasks = totalTasks;
+    }
+
+    public int getCompletedTasks() {
+        return completedTasks;
+    }
+
+    public void setCompletedTasks(int completedTasks) {
+        this.completedTasks = completedTasks;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     @Override
     public String toString() {
-        return "Project{" + "projectId=" + projectId + ", projectName=" + projectName + ", description=" + description
+        return "Project{" + "projectID=" + projectID + ", projectName=" + projectName + ", description=" + description
                 + ", tasks=" + tasks + ", startDate=" + startDate + ", endDate=" + endDate + ", managerId=" + managerId
-                + '}';
+                + ", totalTasks=" + totalTasks + ", completedTasks=" + completedTasks + ", createdAt=" + createdAt
+                + ", updatedAt=" + updatedAt + '}';
     }
 
 }
