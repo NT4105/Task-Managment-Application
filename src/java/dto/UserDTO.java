@@ -4,26 +4,50 @@ import model.enums.UserRole;
 import java.sql.Date;
 
 public class UserDTO {
+    private String userID;
+    private String userName;
     private String firstName;
     private String lastName;
     private String email;
-    private String password;
+    private String phone;
     private UserRole role;
     private Date dob;
-    private String phone;
+    private Date createdAt;
+    private Date updatedAt;
 
-    // Constructor không chứa sensitive data như userID
-    public UserDTO(String firstName, String lastName, String email,
-            UserRole role, Date dob, String phone) {
+    // Constructor
+    public UserDTO(String userID, String userName, String firstName, String lastName,
+            String email, String phone, UserRole role, Date dob,
+            Date createdAt, Date updatedAt) {
+        this.userID = userID;
+        this.userName = userName;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.phone = phone;
         this.role = role;
         this.dob = dob;
-        this.phone = phone;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    // Getters and setters
+    // Getters and Setters
+    public String getUserID() {
+        return userID;
+    }
+
+    public void setUserID(String userID) {
+        this.userID = userID;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
     public String getFirstName() {
         return firstName;
     }
@@ -48,12 +72,12 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public UserRole getRole() {
@@ -72,12 +96,19 @@ public class UserDTO {
         this.dob = dob;
     }
 
-    public String getPhone() {
-        return phone;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

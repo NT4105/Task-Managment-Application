@@ -2,35 +2,64 @@ package dto;
 
 import java.sql.Date;
 import java.util.List;
+import model.enums.TaskStatus;
 
 public class ProjectDTO {
+    private String projectID;
     private String projectName;
     private String description;
     private Date startDate;
     private Date endDate;
-    private String managerName; // Thay vì managerId
-    private int totalTasks; // Số lượng task
-    private int completedTasks; // Số task đã hoàn thành
-    private int pendingTasks; // Số task chưa hoàn thành
-    private List<TaskDTO> recentTasks; // Chỉ lấy các task gần đây
+    private String managerID;
+    private List<String> teamMemberIDs;
+    private List<TaskDTO> tasks;
+    private Date createdAt;
+    private Date updatedAt;
+
+    // Thêm method để tính toán động
+    public int getTotalTasks() {
+        return tasks != null ? tasks.size() : 0;
+    }
+
+    public int getCompletedTasks() {
+        if (tasks == null)
+            return 0;
+        return (int) tasks.stream()
+                .filter(task -> task.getStatus() == TaskStatus.COMPLETED)
+                .count();
+    }
+
+    public double getProgress() {
+        int total = getTotalTasks();
+        return total > 0 ? (getCompletedTasks() * 100.0 / total) : 0;
+    }
 
     // Constructor
-    public ProjectDTO(String projectName, String description,
-            Date startDate, Date endDate, String managerName,
-            int totalTasks, int completedTasks, int pendingTasks,
-            List<TaskDTO> recentTasks) {
+    public ProjectDTO(String projectID, String projectName, String description,
+            Date startDate, Date endDate, String managerID,
+            List<String> teamMemberIDs, List<TaskDTO> tasks,
+            Date createdAt, Date updatedAt) {
+        this.projectID = projectID;
         this.projectName = projectName;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.managerName = managerName;
-        this.totalTasks = totalTasks;
-        this.completedTasks = completedTasks;
-        this.pendingTasks = pendingTasks;
-        this.recentTasks = recentTasks;
+        this.managerID = managerID;
+        this.teamMemberIDs = teamMemberIDs;
+        this.tasks = tasks;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     // Getters and Setters
+    public String getProjectID() {
+        return projectID;
+    }
+
+    public void setProjectID(String projectID) {
+        this.projectID = projectID;
+    }
+
     public String getProjectName() {
         return projectName;
     }
@@ -63,43 +92,43 @@ public class ProjectDTO {
         this.endDate = endDate;
     }
 
-    public String getManagerName() {
-        return managerName;
+    public String getManagerID() {
+        return managerID;
     }
 
-    public void setManagerName(String managerName) {
-        this.managerName = managerName;
+    public void setManagerID(String managerID) {
+        this.managerID = managerID;
     }
 
-    public int getTotalTasks() {
-        return totalTasks;
+    public List<String> getTeamMemberIDs() {
+        return teamMemberIDs;
     }
 
-    public void setTotalTasks(int totalTasks) {
-        this.totalTasks = totalTasks;
+    public void setTeamMemberIDs(List<String> teamMemberIDs) {
+        this.teamMemberIDs = teamMemberIDs;
     }
 
-    public int getCompletedTasks() {
-        return completedTasks;
+    public List<TaskDTO> getTasks() {
+        return tasks;
     }
 
-    public void setCompletedTasks(int completedTasks) {
-        this.completedTasks = completedTasks;
+    public void setTasks(List<TaskDTO> tasks) {
+        this.tasks = tasks;
     }
 
-    public int getPendingTasks() {
-        return pendingTasks;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setPendingTasks(int pendingTasks) {
-        this.pendingTasks = pendingTasks;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public List<TaskDTO> getRecentTasks() {
-        return recentTasks;
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setRecentTasks(List<TaskDTO> recentTasks) {
-        this.recentTasks = recentTasks;
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

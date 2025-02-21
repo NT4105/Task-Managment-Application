@@ -4,23 +4,53 @@ import model.enums.TaskStatus;
 import java.sql.Date;
 
 public class TaskDTO {
+    private String taskID;
+    private String projectID;
     private String taskName;
     private String description;
     private TaskStatus status;
     private Date dueDate;
-    private String assignedUserName; // Thay vì assignedTo ID
+    private String assignedUserID;
+    private String projectName;
+    private int progress;
+    private Date createdAt;
+    private Date updatedAt;
 
     // Constructor
-    public TaskDTO(String taskName, String description, TaskStatus status,
-            Date dueDate, String assignedUserName) {
+    public TaskDTO(String taskID, String projectID, String taskName,
+            String description, TaskStatus status, Date dueDate,
+            String assignedUserID, String projectName, int progress,
+            Date createdAt, Date updatedAt) {
+        this.taskID = taskID;
+        this.projectID = projectID;
         this.taskName = taskName;
         this.description = description;
         this.status = status;
         this.dueDate = dueDate;
-        this.assignedUserName = assignedUserName;
+        this.assignedUserID = assignedUserID;
+        this.projectName = projectName;
+        this.progress = progress;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
-    // Getter & Setter
+    // Getters and Setters
+    public String getTaskID() {
+        return taskID;
+    }
+
+    public void setTaskID(String taskID) {
+        this.taskID = taskID;
+    }
+
+    public String getProjectID() {
+        return projectID;
+    }
+
+    public void setProjectID(String projectID) {
+        this.projectID = projectID;
+    }
+
     public String getTaskName() {
         return taskName;
     }
@@ -53,14 +83,43 @@ public class TaskDTO {
         this.dueDate = dueDate;
     }
 
-    public String getAssignedUserName() {
-        return assignedUserName;
+    public String getAssignedUserID() {
+        return assignedUserID;
     }
 
-    public void setAssignedUserName(String assignedUserName) {
-        this.assignedUserName = assignedUserName;
+    public void setAssignedUserID(String assignedUserID) {
+        this.assignedUserID = assignedUserID;
     }
 
-    // Getters and setters
+    public String getProjectName() {
+        return projectName;
+    }
 
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }
