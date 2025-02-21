@@ -1,88 +1,103 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller.task;
 
+import dao.ProjectDAO;
+import dao.TaskDAO;
+import dao.UserDAO;
+import model.Task;
+import model.User;
+import model.enums.TaskStatus;
+import utils.Validation;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.sql.Date;
+import java.util.UUID;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-/**
- *
- * @author ACER
- */
-@WebServlet(name = "TaskCreateController", urlPatterns = {"/TaskCreateController"})
+@WebServlet("/create-task")
 public class TaskCreateController extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet TaskCreateController</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet TaskCreateController at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession(false);
+
+        // Check if user is logged in and is a manager
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        String userId = (String) session.getAttribute("userId");
+        User user = UserDAO.getInstance().selectById(userId);
+
+        if (user == null || !user.getRole().equals("Manager")) {
+            response.sendRedirect("home");
+            return;
+        }
+
+        // Get projects managed by this user
+        request.setAttribute("projects", ProjectDAO.getInstance().getProjectsByManager(userId));
+
+        // Get all team members
+        request.setAttribute("teamMembers", UserDAO.getInstance().getAllTeamMembers());
+
+        request.getRequestDispatcher("/static/task/create-task.jsp").forward(request, response);
     }
 
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession(false);
+
+        // Check if user is logged in and is a manager
+        if (session == null || session.getAttribute("userId") == null) {
+            response.sendRedirect("login");
+            return;
+        }
+
+        String userId = (String) session.getAttribute("userId");
+        User user = UserDAO.getInstance().selectById(userId);
+
+        if (user == null || !user.getRole().equals("Manager")) {
+            response.sendRedirect("home");
+            return;
+        }
+
+        // Get form data
+        String projectId = request.getParameter("projectId");
+        String taskName = request.getParameter("taskName");
+        String description = request.getParameter("description");
+        String assignedTo = request.getParameter("assignedTo");
+        String dueDateStr = request.getParameter("dueDate");
+
+        // Validate input
+        if (!Validation.isValidDate(dueDateStr)) {
+            request.setAttribute("error", "Invalid date format");
+            doGet(request, response);
+            return;
+        }
+
+        // Create new task
+        Task task = new Task();
+        task.setTaskId(UUID.randomUUID().toString());
+        task.setProjectId(projectId);
+        task.setTaskName(taskName);
+        task.setDescription(description);
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(Date.valueOf(dueDateStr));
+        task.setAssignedTo(assignedTo);
+        task.setCreatedAt(new Date(System.currentTimeMillis()));
+        task.setUpdatedAt(new Date(System.currentTimeMillis()));
+
+        // Save task to database
+        if (TaskDAO.getInstance().insert(task) > 0) {
+            response.sendRedirect("project-details?id=" + projectId);
+        } else {
+            request.setAttribute("error", "Failed to create task");
+            doGet(request, response);
+        }
     }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }
