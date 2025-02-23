@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 package dao;
-
+import dto.UserDTO;
 import model.User;
 import model.enums.UserRole;
 import utils.JDBCUtil;

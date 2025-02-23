@@ -1,4 +1,5 @@
 Create Database TaskManager
+use TaskManager
 -- Users table for authentication and basic user information
 CREATE TABLE Users
 (
