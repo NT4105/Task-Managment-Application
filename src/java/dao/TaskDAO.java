@@ -47,5 +47,28 @@ public class TaskDAO {
         return result;
     }
 
+    public int update(Task task) {
+        int result = 0;
+        String sql = "UPDATE Tasks SET TaskName = ?, Description = ?, AssignedTo = ?, DueDate = ?, UpdatedAt = ? WHERE TaskId = ?";
+
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, task.getTaskName());
+            ps.setString(2, task.getDescription());
+            ps.setString(3, task.getAssignedTo());
+            ps.setDate(4, task.getDueDate());
+            ps.setDate(5, task.getUpdatedAt());
+            ps.setString(6, task.getTaskId());
+
+            result = ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     // Add other necessary methods like update, delete, select, etc.
 }
