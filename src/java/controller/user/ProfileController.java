@@ -1,7 +1,9 @@
 package controller.user;
 
 import dao.UserDAO;
+import dao.ProfileDAO;
 import model.User;
+import model.Profile;
 import utils.Validation;
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -44,9 +46,10 @@ public class ProfileController extends HttpServlet {
         }
 
         String userId = (String) session.getAttribute("userId");
-        User user = UserDAO.getInstance().selectById(userId);
+        ProfileDAO profileDAO = ProfileDAO.getInstance();
+        Profile profile = profileDAO.getProfileByUserId(userId);
 
-        if (user == null) {
+        if (profile == null) {
             response.sendRedirect("login");
             return;
         }
@@ -56,56 +59,61 @@ public class ProfileController extends HttpServlet {
         String lastName = request.getParameter("lastName");
         String phone = request.getParameter("phone");
         String email = request.getParameter("email");
+        String dobStr = request.getParameter("dob");
 
-        // Update only fields that were changed
-        boolean isUpdated = false;
-
-        if (firstName != null && !firstName.equals(user.getFirstName())) {
-            if (Validation.isValidName(firstName, user.getLastName())) {
-                user.setFirstName(firstName);
-                isUpdated = true;
-            } else {
-                request.setAttribute("error", "Invalid first name");
-            }
+        // Validate inputs
+        if (!Validation.isValidName(firstName, lastName)) {
+            request.setAttribute("error", "Invalid name format");
+            request.setAttribute("profile", profile);
+            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+            return;
         }
 
-        if (lastName != null && !lastName.equals(user.getLastName())) {
-            if (Validation.isValidName(user.getFirstName(), lastName)) {
-                user.setLastName(lastName);
-                isUpdated = true;
-            } else {
-                request.setAttribute("error", "Invalid last name");
-            }
+        if (!Validation.isValidPhone(phone)) {
+            request.setAttribute("error", "Invalid phone number");
+            request.setAttribute("profile", profile);
+            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+            return;
         }
 
-        if (phone != null && !phone.equals(user.getPhone())) {
-            if (Validation.isValidPhone(phone)) {
-                user.setPhone(phone);
-                isUpdated = true;
-            } else {
-                request.setAttribute("error", "Invalid phone number");
-            }
+        if (!Validation.isValidEmail(email)) {
+            request.setAttribute("error", "Invalid email format");
+            request.setAttribute("profile", profile);
+            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+            return;
         }
 
-        if (email != null && !email.equals(user.getEmail())) {
-            if (Validation.isValidEmail(email)) {
-                user.setEmail(email);
-                isUpdated = true;
-            } else {
-                request.setAttribute("error", "Invalid email");
-            }
+        // Check for duplicates (excluding current user)
+        if (!profileDAO.checkDuplicateEmail(email, userId)) {
+            request.setAttribute("error", "Email already exists");
+            request.setAttribute("profile", profile);
+            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+            return;
         }
 
-        // Save to database only if there were changes
-        if (isUpdated) {
-            if (UserDAO.getInstance().update(user) > 0) {
-                request.setAttribute("success", "Profile updated successfully");
-            } else {
-                request.setAttribute("error", "Failed to update profile");
-            }
+        if (!profileDAO.checkDuplicatePhone(phone, userId)) {
+            request.setAttribute("error", "Phone number already exists");
+            request.setAttribute("profile", profile);
+            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+            return;
         }
 
-        request.setAttribute("user", user);
+        // Update profile
+        profile.setFirstName(firstName);
+        profile.setLastName(lastName);
+        profile.setPhone(phone);
+        profile.setEmail(email);
+        if (dobStr != null && !dobStr.isEmpty()) {
+            profile.setDateOfBirth(java.sql.Date.valueOf(dobStr));
+        }
+
+        if (profileDAO.updateProfile(profile)) {
+            request.setAttribute("success", "Profile updated successfully");
+        } else {
+            request.setAttribute("error", "Failed to update profile");
+        }
+
+        request.setAttribute("profile", profile);
         request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
     }
 }
