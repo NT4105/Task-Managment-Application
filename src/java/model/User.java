@@ -4,19 +4,24 @@ import model.enums.UserRole;
 import java.sql.Date;
 
 public class User {
-    private String userID;
+    private String UserID;
     private String userName;
     private String password;
     private UserRole role;
     private Date createdAt;
     private Date updatedAt;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
+    private Date dob;
 
     public User() {
     }
 
-    public User(String userID, String userName, String password, UserRole role,
+    public User(String UserID, String userName, String password, UserRole role,
             Date createdAt, Date updatedAt) {
-        this.userID = userID;
+        this.UserID = UserID;
         this.userName = userName;
         this.password = password;
         this.role = role;
@@ -24,12 +29,12 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public String getuserID() {
-        return userID;
+    public String getUserID() {
+        return UserID;
     }
 
-    public void setuserID(String userID) {
-        this.userID = userID;
+    public void setUserID(String UserID) {
+        this.UserID = UserID;
     }
 
     public String getUserName() {
@@ -72,9 +77,51 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
+    }
+
     @Override
     public String toString() {
-        return "User{" + "userID=" + userID + ", userName=" + userName + ", password=" + password + ", role=" + role
-                + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + '}';
+        return "User [UserID=" + UserID + ", userName=" + userName + ", password=" + password + ", role=" + role
+                + ", createdAt=" + createdAt + ", updatedAt=" + updatedAt + ", firstName=" + firstName + ", lastName="
+                + lastName + ", email=" + email + ", phone=" + phone + ", dob=" + dob + "]";
     }
+
 }

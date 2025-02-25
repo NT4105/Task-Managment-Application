@@ -14,6 +14,7 @@ public class UserDTO {
     private Date dob;
     private Date createdAt;
     private Date updatedAt;
+    private String password;
 
     // Constructor
     public UserDTO(String userID, String userName, String firstName, String lastName,
@@ -110,5 +111,13 @@ public class UserDTO {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
