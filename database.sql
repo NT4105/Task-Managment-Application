@@ -3,7 +3,7 @@ use TaskManager
 -- Users table for authentication and basic user information
 CREATE TABLE Users
 (
-    UserId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    UserID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     Username NVARCHAR(50) UNIQUE NOT NULL,
     Password NVARCHAR(255) NOT NULL,
     Role NVARCHAR(20) CHECK (Role IN ('Manager', 'Member')) NOT NULL,
@@ -14,8 +14,8 @@ CREATE TABLE Users
 -- Profiles table for detailed user information
 CREATE TABLE Profiles
 (
-    ProfileId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    UserId UNIQUEIDENTIFIER UNIQUE NOT NULL,
+    ProfileID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    UserID UNIQUEIDENTIFIER UNIQUE NOT NULL,
     FirstName NVARCHAR(50) NOT NULL,
     LastName NVARCHAR(50) NOT NULL,
     Email NVARCHAR(100) UNIQUE NOT NULL,
@@ -23,28 +23,28 @@ CREATE TABLE Profiles
     DateOfBirth DATE,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 -- Projects table
 CREATE TABLE Projects
 (
-    ProjectId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ProjectID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     ProjectName NVARCHAR(100) NOT NULL,
     Description NVARCHAR(MAX),
     StartDate DATE NOT NULL,
     EndDate DATE,
-    ManagerId UNIQUEIDENTIFIER NOT NULL,
+    ManagerID UNIQUEIDENTIFIER NOT NULL,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (ManagerId) REFERENCES Users(UserId)
+    FOREIGN KEY (ManagerID) REFERENCES Users(UserID)
 );
 
 -- Tasks table
 CREATE TABLE Tasks
 (
-    TaskId UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-    ProjectId UNIQUEIDENTIFIER NOT NULL,
+    TaskID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+    ProjectID UNIQUEIDENTIFIER NOT NULL,
     TaskName NVARCHAR(100) NOT NULL,
     Description NVARCHAR(MAX),
     Status NVARCHAR(20) CHECK (Status IN ('Pending', 'In Progress', 'Completed')) DEFAULT 'Pending',
@@ -52,21 +52,21 @@ CREATE TABLE Tasks
     AssignedTo UNIQUEIDENTIFIER,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (ProjectId) REFERENCES Projects(ProjectId),
-    FOREIGN KEY (AssignedTo) REFERENCES Users(UserId)
+    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
+    FOREIGN KEY (AssignedTo) REFERENCES Users(UserID)
 );
 
 -- Project Members table (for managing team members in projects)
 CREATE TABLE ProjectMembers
 (
-    ProjectId UNIQUEIDENTIFIER NOT NULL,
+    ProjectID UNIQUEIDENTIFIER NOT NULL,
     UserId UNIQUEIDENTIFIER NOT NULL,
     JoinedAt DATETIME DEFAULT GETDATE(),
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    PRIMARY KEY (ProjectId, UserId),
-    FOREIGN KEY (ProjectId) REFERENCES Projects(ProjectId),
-    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+    PRIMARY KEY (ProjectID, UserId),
+    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
+    FOREIGN KEY (UserId) REFERENCES Users(UserID)
 );
 
 -- Trigger để tự động cập nhật UpdatedAt khi dữ liệu thay đổi
@@ -76,7 +76,7 @@ BEGIN
     UPDATE Users
     SET UpdatedAt = GETDATE()
     FROM Users u
-        INNER JOIN inserted i ON u.UserId = i.UserId
+        INNER JOIN inserted i ON u.UserID = i.UserID
 END
 GO
 
@@ -85,7 +85,7 @@ BEGIN
     UPDATE Profiles
     SET UpdatedAt = GETDATE()
     FROM Profiles p
-        INNER JOIN inserted i ON p.ProfileId = i.ProfileId
+        INNER JOIN inserted i ON p.ProfileID = i.ProfileID
 END
 GO
 
@@ -94,7 +94,7 @@ BEGIN
     UPDATE Projects
     SET UpdatedAt = GETDATE()
     FROM Projects p
-        INNER JOIN inserted i ON p.ProjectId = i.ProjectId
+        INNER JOIN inserted i ON p.ProjectID = i.ProjectID
 END
 GO
 
@@ -103,7 +103,7 @@ BEGIN
     UPDATE Tasks
     SET UpdatedAt = GETDATE()
     FROM Tasks t
-        INNER JOIN inserted i ON t.TaskId = i.TaskId
+        INNER JOIN inserted i ON t.TaskID = i.TaskID
 END
 GO
 
@@ -112,7 +112,7 @@ BEGIN
     UPDATE ProjectMembers
     SET UpdatedAt = GETDATE()
     FROM ProjectMembers pm
-        INNER JOIN inserted i ON pm.ProjectId = i.ProjectId AND pm.UserId = i.UserId
+        INNER JOIN inserted i ON pm.ProjectID = i.ProjectID AND pm.UserID = i.UserID
 END
 
 -- 2. Trigger tự động cập nhật số lượng tasks trong project
@@ -122,16 +122,16 @@ ON Tasks
 AFTER INSERT, UPDATE, DELETE
 AS
 BEGIN
-    -- Tạo bảng tạm để lưu ProjectId bị ảnh hưởng
-    DECLARE @AffectedProjects TABLE (ProjectId UNIQUEIDENTIFIER)
+    -- Tạo bảng tạm để lưu ProjectID bị ảnh hưởng
+    DECLARE @AffectedProjects TABLE (ProjectID UNIQUEIDENTIFIER)
 
-    -- Thu thập ProjectId từ các thao tác INSERT/UPDATE/DELETE
+    -- Thu thập ProjectID từ các thao tác INSERT/UPDATE/DELETE
     INSERT INTO @AffectedProjects
-        (ProjectId)
-            SELECT DISTINCT ProjectId
+        (ProjectID)
+            SELECT DISTINCT ProjectID
         FROM inserted
     UNION
-        SELECT DISTINCT ProjectId
+        SELECT DISTINCT ProjectID
         FROM deleted
 
     -- Cập nhật thống kê cho các projects bị ảnh hưởng
@@ -140,15 +140,15 @@ BEGIN
         TotalTasks = (
             SELECT COUNT(*)
     FROM Tasks
-    WHERE Tasks.ProjectId = Projects.ProjectId
+    WHERE Tasks.ProjectID = Projects.ProjectID
         ),
         CompletedTasks = (
             SELECT COUNT(*)
     FROM Tasks
-    WHERE Tasks.ProjectId = Projects.ProjectId
+    WHERE Tasks.ProjectID = Projects.ProjectID
         AND Tasks.Status = 'Completed'
         )
-    WHERE Projects.ProjectId IN (SELECT ProjectId
+    WHERE Projects.ProjectID IN (SELECT ProjectID
     FROM @AffectedProjects)
 END
 GO

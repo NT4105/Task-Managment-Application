@@ -33,9 +33,9 @@ public class HomeController extends HttpServlet {
 
             // Redirect based on role
             if ("Manager".equals(user.getRole())) {
-                request.getRequestDispatcher("/static/manager-home.jsp").forward(request, response);
+                request.getRequestDispatcher("/static/home/manager-home.jsp").forward(request, response);
             } else {
-                request.getRequestDispatcher("/static/member-home.jsp").forward(request, response);
+                request.getRequestDispatcher("/static/home/member-home.jsp").forward(request, response);
             }
         } else {
             // Invalid user in session
