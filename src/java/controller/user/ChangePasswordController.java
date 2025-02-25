@@ -60,7 +60,7 @@ public class ChangePasswordController extends HttpServlet {
 
         if (user != null && user.getPassword().equals(Util.encryptPassword(currentPassword))) {
             user.setPassword(Util.encryptPassword(newPassword));
-            if (userDAO.updatePassword(user)) {
+            if (userDAO.updatePassword(user.getId(), newPassword)) {
                 request.setAttribute("success", "Password changed successfully");
             } else {
                 request.setAttribute("error", "Failed to change password");

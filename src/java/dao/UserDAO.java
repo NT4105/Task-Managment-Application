@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 public class UserDAO {
 
     public static UserDAO getInstance() {
-        return new UserDAO();
+        return new UserDAO(); 
     }
 
     public int insert(User user) {
@@ -79,7 +80,7 @@ public class UserDAO {
         int result = 0;
         try {
             Connection con = JDBCUtil.getConnection();
-            String sql = "UPDATE user SET firstName = ?, lastName = ?, dob = ?, phone = ?, email = ?, password = ? WHERE UserId = ?";
+            String sql = "UPDATE user SET firstName = ?, lastName = ?, dob = ?, phone = ?, email = ?, password = ? WHERE UserName = ?";
             PreparedStatement pst = con.prepareStatement(sql);
             pst.setString(1, user.getFirstName());
             pst.setString(2, user.getLastName());
@@ -91,7 +92,7 @@ public class UserDAO {
             } else {
                 pst.setString(6, user.getPassword());
             }
-            pst.setString(7, user.getUserID());
+            pst.setString(7, user.getUserName());
 
             result = pst.executeUpdate();
             JDBCUtil.closeConnection(con);
@@ -124,10 +125,10 @@ public class UserDAO {
                 String email = rs.getString("email");
                 String password = rs.getString("password");
                 String role = rs.getString("role");
-
+                
                 User user = new User(id, firstName, lastName, userName, dob, phone, email, password,
-                        UserRole.fromString(role));
-                res.add(user);
+                        UserRole.fromString(role).getDisplayValue());
+                 res.add(user);
             }
             JDBCUtil.closeConnection(con);
         } catch (Exception e) {
@@ -157,7 +158,7 @@ public class UserDAO {
                 String role = rs.getString("role");
 
                 result = new User(userId, firstName, lastName, userName, dob, phone, email, password,
-                        UserRole.fromString(role));
+                        UserRole.fromString(role).getDisplayValue());
             }
             JDBCUtil.closeConnection(con);
         } catch (Exception e) {
@@ -190,7 +191,7 @@ public class UserDAO {
                 String role = rs.getString("role");
 
                 User user = new User(userId, firstName, lastName, userName, dob, phone, email, password,
-                        UserRole.fromString(role));
+                        UserRole.fromString(role).getDisplayValue());
                 res.add(user);
             }
 
@@ -228,7 +229,7 @@ public class UserDAO {
         User res = null;
         ArrayList<User> check = selectAll();
         for (User user : check) {
-            if (Util.encryptPassword(user.getUserID()).equals(id)) {
+            if (Util.encryptPassword(user.getId()).equals(id)) {
                 res = user;
             }
         }
@@ -297,5 +298,41 @@ public class UserDAO {
     public boolean checkDuplicateUsername(String username) {
         ArrayList<User> users = selectAll();
         return users.stream().noneMatch(user -> username.equals(user.getUserName()));
+    }
+    
+    public List<User> getAllTeamMembers() {
+       List<User> teamMembers = new ArrayList<>();
+    
+      try {
+        Connection con = JDBCUtil.getConnection();
+        String sql = "SELECT * FROM user WHERE role = ?";
+        PreparedStatement pst = con.prepareStatement(sql);
+        pst.setString(1, "TEAM_MEMBER"); 
+        
+        ResultSet rs = pst.executeQuery();
+        
+        while (rs.next()) {
+            String userId = rs.getString("UserId");
+            String firstName = rs.getString("firstName");
+            String lastName = rs.getString("lastName");
+            String userName = rs.getString("userName");
+            Date dob = rs.getDate("dob");
+            String phone = rs.getString("phone");
+            String email = rs.getString("email");
+            String password = rs.getString("password");
+            String role = rs.getString("role");
+            
+            User user = new User(userId, firstName, lastName, userName, dob, phone, email, password,
+                    UserRole.fromString(role).getDisplayValue());
+            teamMembers.add(user);
+        }
+        
+        JDBCUtil.closeConnection(con);
+        
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    
+    return teamMembers;
     }
 }

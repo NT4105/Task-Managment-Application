@@ -24,6 +24,7 @@ public class SignUpController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         // can hoan thien phan check form EMAIl
+        String id = req.getParameter("id");
         String firstName = req.getParameter("firstName");
         String lastName = req.getParameter("lastName");
         String userName = req.getParameter("userName");
@@ -59,8 +60,8 @@ public class SignUpController extends HttpServlet {
             req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
             return;
         }
-
-        User user = new User(firstName, lastName, userName, Date.valueOf(dob), phone, email, password, role);
+        
+        User user = new User(id, firstName, lastName, userName, Date.valueOf(dob), phone, email, password, role);
 
         if (!UserDAO.getInstance().checkDuplicateEmail(email)) {
             req.setAttribute("error", "Email is duplicated");
