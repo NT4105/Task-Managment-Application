@@ -1,6 +1,8 @@
 package utils;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 public class Validation {
 
@@ -150,6 +152,70 @@ public class Validation {
             System.out.println("String cannot contain spaces.");
             return false;
         }
+        return true;
+    }
+
+    public static boolean isValidTaskDate(Date taskDate) {
+        if (taskDate == null) {
+            System.out.println("Task date cannot be null");
+            return false;
+        }
+
+        // Check if date is not in the past
+        Date today = new Date(System.currentTimeMillis());
+        if (taskDate.before(today)) {
+            System.out.println("Task date cannot be in the past");
+            return false;
+        }
+
+        // Check if date is within 7 days
+        long sevenDaysInMillis = 7L * 24 * 60 * 60 * 1000;
+        Date sevenDaysFromNow = new Date(today.getTime() + sevenDaysInMillis);
+        if (taskDate.after(sevenDaysFromNow)) {
+            System.out.println("Task due date must be within 7 days");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isValidAssignees(List<String> assignees) {
+        if (assignees == null || assignees.isEmpty()) {
+            System.out.println("Task must have at least one assignee");
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isValidTaskName(String taskName) {
+        if (taskName == null || taskName.isEmpty()) {
+            System.out.println("Task name cannot be empty");
+            return false;
+        }
+
+        if (taskName.length() < 2 || taskName.length() > 100) {
+            System.out.println("Task name must be between 2 and 100 characters");
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isValidTaskDueDate(String dueDate) {
+        if (dueDate == null || dueDate.isEmpty()) {
+            System.out.println("Due date cannot be empty");
+            return false;
+        }
+
+        if (!isValidDate(dueDate)) {
+            System.out.println("Invalid date format. Use YYYY-MM-DD");
+            return false;
+        }
+
+        if (!isValidTaskDate(new Date(dueDate))) {
+            System.out.println("Due date must be within 7 days");
+            return false;
+        }
+
         return true;
     }
 }
