@@ -2,6 +2,8 @@ package model;
 
 import model.enums.TaskStatus;
 import java.sql.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Task {
     private String taskID;
@@ -10,41 +12,47 @@ public class Task {
     private String description;
     private TaskStatus status;
     private Date dueDate;
-    private String assignedTo;
+    private List<String> assignedUsers; // changed from single assignedTo
+    private String submissionLink;
+    private String submissionFilePath;
     private Date createdAt;
     private Date updatedAt;
 
     // Constructor
     public Task() {
+        this.assignedUsers = new ArrayList<>();
     }
 
-    public Task(String taskID, String projectID, String taskName, String description,
-            TaskStatus status, Date dueDate, String assignedTo, Date createdAt, Date updatedAt) {
+    public Task(String taskID, String projectID, String taskName, String description, TaskStatus status, Date dueDate,
+            List<String> assignedUsers, String submissionLink, String submissionFilePath, Date createdAt,
+            Date updatedAt) {
         this.taskID = taskID;
         this.projectID = projectID;
         this.taskName = taskName;
         this.description = description;
         this.status = status;
         this.dueDate = dueDate;
-        this.assignedTo = assignedTo;
+        this.assignedUsers = assignedUsers;
+        this.submissionLink = submissionLink;
+        this.submissionFilePath = submissionFilePath;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
     // Getter & Setter
-    public String getTaskId() {
+    public String getTaskID() {
         return taskID;
     }
 
-    public void setTaskId(String taskID) {
+    public void setTaskID(String taskID) {
         this.taskID = taskID;
     }
 
-    public String getProjectId() {
+    public String getProjectID() {
         return projectID;
     }
 
-    public void setProjectId(String projectID) {
+    public void setProjectID(String projectID) {
         this.projectID = projectID;
     }
 
@@ -80,12 +88,28 @@ public class Task {
         this.dueDate = dueDate;
     }
 
-    public String getAssignedTo() {
-        return assignedTo;
+    public List<String> getAssignedUsers() {
+        return assignedUsers;
     }
 
-    public void setAssignedTo(String assignedTo) {
-        this.assignedTo = assignedTo;
+    public void setAssignedUsers(List<String> assignedUsers) {
+        this.assignedUsers = assignedUsers;
+    }
+
+    public String getSubmissionLink() {
+        return submissionLink;
+    }
+
+    public void setSubmissionLink(String submissionLink) {
+        this.submissionLink = submissionLink;
+    }
+
+    public String getSubmissionFilePath() {
+        return submissionFilePath;
+    }
+
+    public void setSubmissionFilePath(String submissionFilePath) {
+        this.submissionFilePath = submissionFilePath;
     }
 
     public Date getCreatedAt() {
@@ -108,8 +132,26 @@ public class Task {
     public String toString() {
         return "Task{" + "taskID=" + taskID + ", projectID=" + projectID + ", taskName=" + taskName + ", description="
                 + description + ", status="
-                + status + ", dueDate=" + dueDate + ", assignedTo=" + assignedTo + ", createdAt=" + createdAt
+                + status + ", dueDate=" + dueDate + ", assignedUsers=" + assignedUsers + ", submissionLink="
+                + submissionLink
+                + ", submissionFilePath=" + submissionFilePath + ", createdAt=" + createdAt
                 + ", updatedAt=" + updatedAt + '}';
     }
 
+    // Add these methods to check if the task is due soon or overdue
+    public boolean isDueSoon() {
+        if (dueDate == null)
+            return false;
+
+        long diffInMillies = dueDate.getTime() - System.currentTimeMillis();
+        long diffInDays = diffInMillies / (24 * 60 * 60 * 1000);
+
+        return diffInDays >= 0 && diffInDays <= 3;
+    }
+
+    public boolean isOverdue() {
+        if (dueDate == null)
+            return false;
+        return dueDate.before(new Date(System.currentTimeMillis()));
+    }
 }

@@ -69,6 +69,26 @@ CREATE TABLE ProjectMembers
     FOREIGN KEY (UserId) REFERENCES Users(UserID)
 );
 
+-- Add new table for task assignments
+CREATE TABLE TaskAssignments
+(
+    TaskID UNIQUEIDENTIFIER,
+    UserID UNIQUEIDENTIFIER,
+    Status NVARCHAR(20) DEFAULT 'PENDING',
+    SubmissionLink NVARCHAR(MAX),
+    SubmissionFilePath NVARCHAR(MAX),
+    AssignedAt DATETIME DEFAULT GETDATE(),
+    CompletedAt DATETIME,
+    PRIMARY KEY (TaskID, UserID),
+    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+-- Add submission columns to Tasks table
+ALTER TABLE Tasks ADD
+    SubmissionLink NVARCHAR(MAX),
+    SubmissionFilePath NVARCHAR(MAX);
+
 -- Trigger để tự động cập nhật UpdatedAt khi dữ liệu thay đổi
 GO
 CREATE TRIGGER TR_Users_UpdateTimestamp ON Users AFTER UPDATE AS
@@ -152,3 +172,36 @@ BEGIN
     FROM @AffectedProjects)
 END
 GO
+
+-- Trigger để cập nhật status của Task thành COMPLETED khi TaskAssignment được cập nhật thành COMPLETED
+CREATE TRIGGER TR_UpdateTaskStatusOnSubmission
+ON TaskAssignments
+AFTER UPDATE
+AS
+BEGIN
+    -- Kiểm tra nếu có bản ghi vừa được cập nhật thành COMPLETED
+    IF EXISTS (
+        SELECT 1
+    FROM inserted i
+    WHERE i.Status = 'COMPLETED'
+    )
+    BEGIN
+        -- Lấy TaskID từ bản ghi vừa được cập nhật
+        DECLARE @TaskID UNIQUEIDENTIFIER;
+        SELECT @TaskID = TaskID
+        FROM inserted;
+
+        -- Cập nhật status của Task thành COMPLETED
+        UPDATE Tasks
+        SET Status = 'COMPLETED',
+            UpdatedAt = GETDATE()
+        WHERE TaskID = @TaskID;
+
+        -- Cập nhật tất cả TaskAssignments khác của task này thành COMPLETED
+        UPDATE TaskAssignments
+        SET Status = 'COMPLETED',
+            CompletedAt = GETDATE()
+        WHERE TaskID = @TaskID
+            AND Status = 'IN_PROGRESS';
+    END
+END;
