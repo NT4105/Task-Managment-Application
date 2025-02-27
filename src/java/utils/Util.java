@@ -2,6 +2,7 @@ package utils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Util {
 
@@ -12,30 +13,31 @@ public class Util {
      */
     public static String encryptPassword(String password) {
         if (password == null) {
-            // Xử lý trường hợp password là null
             return null;
         }
 
         try {
-            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = messageDigest.digest(password.getBytes());
-
-            // Chuyển đổi byte array thành định dạng hex
-            StringBuilder hexString = new StringBuilder();
-            for (byte hashByte : hashBytes) {
-                String hex = Integer.toHexString(0xff & hashByte);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
-            }
-
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
+            // Use BCrypt to hash the password with a randomly generated salt
+            return BCrypt.hashpw(password, BCrypt.gensalt());
+        } catch (Exception e) {
             e.printStackTrace();
-            // Xử lý ngoại lệ nếu thuật toán không được hỗ trợ
             return null;
         }
+    }
 
+    /*
+     * Method to verify if a password matches its hashed version
+     */
+    public static boolean verifyPassword(String password, String hashedPassword) {
+        if (password == null || hashedPassword == null) {
+            return false;
+        }
+
+        try {
+            return BCrypt.checkpw(password, hashedPassword);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
