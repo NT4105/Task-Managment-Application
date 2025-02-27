@@ -49,7 +49,8 @@ public class ChangePasswordController extends HttpServlet {
         }
 
         if (!Validation.isValidPassword(newPassword)) {
-            request.setAttribute("error", "Invalid password format");
+            request.setAttribute("error",
+                    "Password must be at least 8 characters and contain at least one number and one special character");
             request.getRequestDispatcher("/static/user/change-password.jsp").forward(request, response);
             return;
         }
