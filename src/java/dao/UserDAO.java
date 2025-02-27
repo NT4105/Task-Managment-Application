@@ -181,19 +181,23 @@ public class UserDAO {
     }
 
     public String login(String email, String password) {
-        String sql = "SELECT u.UserId FROM Users u " +
-                "INNER JOIN Profiles p ON u.UserId = p.UserId " +
-                "WHERE p.Email = ? AND u.Password = ?";
+        String sql = "SELECT u.UserID, u.Password FROM Users u " +
+                "JOIN Profiles p ON u.UserID = p.UserID " +
+                "WHERE p.Email = ?";
 
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
-
             ps.setString(1, email);
-            ps.setString(2, Util.encryptPassword(password));
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getString("UserId");
+                    String storedHash = rs.getString("Password");
+                    String userId = rs.getString("UserID");
+
+                    // Use the new verifyPassword method to check the password
+                    if (Util.verifyPassword(password, storedHash)) {
+                        return userId;
+                    }
                 }
             }
         } catch (SQLException e) {
