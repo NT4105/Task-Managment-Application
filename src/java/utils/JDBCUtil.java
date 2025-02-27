@@ -15,7 +15,7 @@ public class JDBCUtil {
     private static final String password = "12345";
 
     private static final String url = "jdbc:sqlserver://" + hostname + ":" + port + ";databaseName=" + databaseName
-            + ";trustServerCertificate=true";
+            + ";trustServerCertificate=true"; // Hoặc ";encrypt=false"; đều được
 
     public static Connection getConnection() {
         Connection con = null;
