@@ -51,38 +51,34 @@ public class Validation {
     }
 
     public static boolean isValidEmail(String email) {
-        if (email.isEmpty()) {
-            System.out.println("Email cannot be empty.");
+        if (email == null || email.isEmpty()) {
             return false;
         }
 
-        if (checkSpace(email)) {
-            System.out.println("Email cannot contain spaces.");
-            return false;
-        }
-
-        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-            System.out.println("Invalid email format.");
-            return false;
-        }
-        return true;
+        // Basic email validation pattern
+        String emailPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailPattern);
     }
 
     public static boolean isValidPassword(String password) {
-        if (password.isEmpty()) {
-            System.out.println("Password cannot be empty.");
+        if (password == null || password.length() < 8) {
             return false;
         }
-        if (password.length() < 8 || password.length() > 20) {
-            System.out.println("Password must be between 8 and 20 characters.");
-            return false;
+
+        // Require at least one digit and one special character
+        boolean hasDigit = false;
+        boolean hasSpecial = false;
+        String specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
+
+        for (char c : password.toCharArray()) {
+            if (Character.isDigit(c)) {
+                hasDigit = true;
+            } else if (specialChars.indexOf(c) >= 0) {
+                hasSpecial = true;
+            }
         }
-        if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,20}$")) {
-            System.out.println(
-                    "Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.");
-            return false;
-        }
-        return true;
+
+        return hasDigit && hasSpecial;
     }
 
     public static boolean isValidId(int id) {
