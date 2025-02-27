@@ -39,6 +39,18 @@
         border-radius: 4px;
         cursor: pointer;
       }
+
+      .forgot-password {
+        text-align: right;
+        margin-bottom: 15px;
+      }
+      .forgot-password a {
+        color: #1877f2;
+        text-decoration: none;
+      }
+      .forgot-password a:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
@@ -53,7 +65,9 @@
         <br />
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required />
-        <br />
+        <div class="forgot-password">
+          <a href="forgot-password">Forgot Password?</a>
+        </div>
         <button type="submit">Login</button>
       </form>
       <p>Don't have an account? <a href="sign-up">Sign up</a></p>
