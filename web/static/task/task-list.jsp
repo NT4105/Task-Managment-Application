@@ -113,6 +113,7 @@
                         <div class="task-actions">
                             <a href="view-task?id=${task.taskID}" class="btn btn-primary">View</a>
                             <c:if test="${sessionScope.userRole == 'MANAGER'}">
+                                <a href="update-task?id=${task.taskID}" class="btn">Edit</a>
                                 <button onclick="deleteTask('${task.taskID}')" class="btn btn-danger">Delete</button>
                             </c:if>
                         </div>
@@ -122,14 +123,14 @@
         </div>
 
         <script>
-            function deleteTask(taskId) {
+            function deleteTask(taskID) {
                 if (confirm('Are you sure you want to delete this task?')) {
                     fetch('delete-task', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
                         },
-                        body: 'taskId=' + taskId
+                        body: 'taskID=' + taskID
                     })
                     .then(response => {
                         if (response.ok) {

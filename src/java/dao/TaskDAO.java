@@ -102,14 +102,24 @@ public class TaskDAO {
     }
 
     public boolean acceptTask(String taskId, String userId) {
-        String sql = "INSERT INTO TaskAssignments (TaskID, UserID, Status) VALUES (?, ?, 'IN_PROGRESS')";
+        String sql = "INSERT INTO TaskAssignments (TaskID, UserID, Status, AssignedAt) " +
+                "VALUES (?, ?, 'IN_PROGRESS', GETDATE())";
+
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, taskId);
             ps.setString(2, userId);
 
-            return ps.executeUpdate() > 0;
+            // Update task status to IN_PROGRESS
+            if (ps.executeUpdate() > 0) {
+                String updateTaskSql = "UPDATE Tasks SET Status = 'IN_PROGRESS' WHERE TaskID = ?";
+                try (PreparedStatement updatePs = con.prepareStatement(updateTaskSql)) {
+                    updatePs.setString(1, taskId);
+                    updatePs.executeUpdate();
+                }
+                return true;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -138,7 +148,7 @@ public class TaskDAO {
 
     public List<TaskAssignment> getTaskAssignments(String taskId) {
         List<TaskAssignment> assignments = new ArrayList<>();
-        String sql = "SELECT ta.*, u.Username, p.FirstName, p.LastName " +
+        String sql = "SELECT ta.*, u.Username, CONCAT(p.FirstName, ' ', p.LastName) as FullName " +
                 "FROM TaskAssignments ta " +
                 "JOIN Users u ON ta.UserID = u.UserID " +
                 "JOIN Profiles p ON u.UserID = p.UserID " +
@@ -154,7 +164,7 @@ public class TaskDAO {
                     assignment.setTaskId(rs.getString("TaskID"));
                     assignment.setUserId(rs.getString("UserID"));
                     assignment.setUsername(rs.getString("Username"));
-                    assignment.setFullName(rs.getString("FirstName") + " " + rs.getString("LastName"));
+                    assignment.setFullName(rs.getString("FullName"));
                     assignment.setStatus(TaskStatus.valueOf(rs.getString("Status")));
                     assignment.setSubmissionLink(rs.getString("SubmissionLink"));
                     assignment.setSubmissionFilePath(rs.getString("SubmissionFilePath"));
@@ -261,11 +271,11 @@ public class TaskDAO {
         return task;
     }
 
-    public boolean deleteTask(String taskId) {
+    public boolean deleteTask(String taskID) {
         String sql = "DELETE FROM Tasks WHERE TaskID = ?";
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, taskId);
+            ps.setString(1, taskID);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -17,6 +17,7 @@ public class Task {
     private String submissionFilePath;
     private Date createdAt;
     private Date updatedAt;
+    private List<TaskAssignment> assignments; // Add this field to track assignments
 
     // Constructor
     public Task() {
@@ -153,5 +154,17 @@ public class Task {
         if (dueDate == null)
             return false;
         return dueDate.before(new Date(System.currentTimeMillis()));
+    }
+
+    public void addAssignment(TaskAssignment assignment) {
+        if (assignments == null) {
+            assignments = new ArrayList<>();
+        }
+        assignments.add(assignment);
+        this.status = TaskStatus.IN_PROGRESS; // Update status when task is assigned
+    }
+
+    public List<TaskAssignment> getAssignments() {
+        return assignments;
     }
 }

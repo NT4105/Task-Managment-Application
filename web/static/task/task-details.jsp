@@ -174,6 +174,23 @@
                 </c:when>
             </c:choose>
 
+            <div class="task-assignments">
+                <h3>Current Assignments</h3>
+                <c:forEach var="assignment" items="${task.assignments}">
+                    <div class="assignment">
+                        <span>${assignment.fullName} (${assignment.username})</span>
+                        <span>Joined: ${assignment.assignedAt}</span>
+                    </div>
+                </c:forEach>
+                
+                <c:if test="${sessionScope.userRole == 'MEMBER'}">
+                    <form action="accept-task" method="POST">
+                        <input type="hidden" name="taskId" value="${task.taskID}" />
+                        <button type="submit" class="btn">Accept Task</button>
+                    </form>
+                </c:if>
+            </div>
+
             <div style="margin-top: 20px;">
                 <a href="project-details?id=${task.projectID}" class="btn">Back to Project</a>
             </div>
