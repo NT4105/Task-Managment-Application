@@ -90,7 +90,7 @@
             <h1>Task List</h1>
             
             <div class="filters">
-                <form action="task-list" method="GET">
+                <form action="${pageContext.request.contextPath}/task/list" method="GET">
                     <input type="hidden" name="projectId" value="${projectId}">
                     <input type="text" name="search" placeholder="Search by task name" 
                            value="${param.search}" class="search-box">
@@ -113,19 +113,21 @@
                         <div class="task-actions">
                             <a href="view-task?id=${task.taskID}" class="btn btn-primary">View</a>
                             <c:if test="${sessionScope.userRole == 'MANAGER'}">
-                                <a href="update-task?id=${task.taskID}" class="btn">Edit</a>
+                                <a href="${pageContext.request.contextPath}/task/update?id=${task.taskID}" class="btn">Edit</a>
                                 <button onclick="deleteTask('${task.taskID}')" class="btn btn-danger">Delete</button>
                             </c:if>
                         </div>
                     </div>
                 </c:forEach>
             </div>
+
+            <a href="${pageContext.request.contextPath}/task/create" class="btn btn-primary">Create New Task</a>
         </div>
 
         <script>
             function deleteTask(taskID) {
                 if (confirm('Are you sure you want to delete this task?')) {
-                    fetch('delete-task', {
+                    fetch('${pageContext.request.contextPath}/task/delete', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',

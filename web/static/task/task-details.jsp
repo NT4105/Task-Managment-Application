@@ -184,16 +184,20 @@
                 </c:forEach>
                 
                 <c:if test="${sessionScope.userRole == 'MEMBER'}">
-                    <form action="accept-task" method="POST">
+                    <form action="${pageContext.request.contextPath}/task/accept" method="POST">
                         <input type="hidden" name="taskId" value="${task.taskID}" />
                         <button type="submit" class="btn">Accept Task</button>
                     </form>
                 </c:if>
             </div>
 
-            <div style="margin-top: 20px;">
-                <a href="project-details?id=${task.projectID}" class="btn">Back to Project</a>
+            <div style="margin-top: 20px">
+              <a
+                href="${pageContext.request.contextPath}/project/details?id=${task.projectID}"
+                class="btn"
+                >Back to Project</a
+              >
             </div>
-        </div>
-    </body>
+          </div>
+        </body>
 </html> 

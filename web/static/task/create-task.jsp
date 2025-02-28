@@ -70,7 +70,10 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <div class="error-message">${error}</div>
       </c:if>
 
-      <form action="create-task" method="POST">
+      <form
+        action="${pageContext.request.contextPath}/task/create"
+        method="POST"
+      >
         <div class="form-group">
           <label for="projectId">Project:</label>
           <select id="projectId" name="projectId" required>
@@ -110,7 +113,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
         <button type="submit" class="btn">Create Task</button>
         <a
-          href="project-details?id=${projectId}"
+          href="${pageContext.request.contextPath}/project/details?id=${projectId}"
           class="btn"
           style="margin-left: 10px"
           >Cancel</a

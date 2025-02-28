@@ -68,7 +68,7 @@
                 <div class="error-message">${error}</div>
             </c:if>
 
-            <form action="update-task" method="POST">
+            <form action="${pageContext.request.contextPath}/task/update" method="POST">
                 <input type="hidden" name="taskId" value="${task.taskID}">
                 
                 <div class="form-group">
@@ -97,15 +97,20 @@
                     <input type="date" id="dueDate" name="dueDate" value="${task.dueDate}" required>
                 </div>
 
-                <button type="submit" class="btn">Update Task</button>
-                <a href="project-details?id=${task.projectID}" class="btn" style="margin-left: 10px;">Cancel</a>
-            </form>
-        </div>
+        <button type="submit" class="btn">Update Task</button>
+        <a
+          href="${pageContext.request.contextPath}/project/details?id=${task.projectID}"
+          class="btn"
+          style="margin-left: 10px"
+          >Cancel</a
+        >
+      </form>
+    </div>
 
         <script>
-            // Set minimum date as today
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dueDate').setAttribute('min', today);
-        </script>
-    </body>
-</html> 
+      // Set minimum date as today
+      const today = new Date().toISOString().split("T")[0];
+      document.getElementById("dueDate").setAttribute("min", today);
+    </script>
+  </body>
+</html>
