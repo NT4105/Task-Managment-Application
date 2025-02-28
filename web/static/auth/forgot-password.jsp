@@ -23,7 +23,7 @@
         <p style="color: red">${error}</p>
       </c:if>
 
-      <form method="post" action="forgot-password">
+      <form method="post" action="auth/forgot-password">
         <input type="hidden" name="step" value="verify" />
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
@@ -31,7 +31,7 @@
         <button type="submit">Continue</button>
       </form>
 
-      <p><a href="login">Back to Login</a></p>
+      <p><a href="auth/login">Back to Login</a></p>
     </div>
   </body>
 </html>

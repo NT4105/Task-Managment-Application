@@ -59,14 +59,19 @@
       <c:if test="${requestScope.error != null}">
         <p style="color: red">${requestScope.error}</p>
       </c:if>
-      <form method="post">
+      <form
+        action="${pageContext.request.contextPath}/auth/login"
+        method="post"
+      >
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
         <br />
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required />
         <div class="forgot-password">
-          <a href="forgot-password">Forgot Password?</a>
+          <a href="${pageContext.request.contextPath}/auth/forgot-password"
+            >Forgot Password?</a
+          >
         </div>
         <button type="submit">Login</button>
       </form>
