@@ -1,9 +1,3 @@
-<%-- 
-    Document   : member-home
-    Created on : Feb 19, 2025, 2:55:36 PM
-    Author     : ACER
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -124,7 +118,7 @@
                             Due: ${task.dueDate}
                         </div>
                         <div style="margin-top: 10px;">
-                            <form action="update-task-status" method="POST" style="display: inline;">
+                            <form action="${pageContext.request.contextPath}/task/update-status" method="POST" style="display: inline;">
                                 <input type="hidden" name="taskId" value="${task.taskId}">
                                 <select name="status" onchange="this.form.submit()">
                                     <option value="PENDING" ${task.status == 'PENDING' ? 'selected' : ''}>Pending</option>
@@ -132,7 +126,7 @@
                                     <option value="COMPLETED" ${task.status == 'COMPLETED' ? 'selected' : ''}>Completed</option>
                                 </select>
                             </form>
-                            <a href="view-task?id=${task.taskId}" class="btn" style="margin-left: 10px;">View Details</a>
+                            <a href="${pageContext.request.contextPath}/task/details?id=${task.taskId}" class="btn" style="margin-left: 10px;">View Details</a>
                         </div>
                     </div>
                 </c:forEach>
