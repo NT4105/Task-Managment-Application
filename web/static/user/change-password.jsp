@@ -80,7 +80,9 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <div class="container">
       <div class="header">
         <h1>Change Password</h1>
-        <a href="profile" class="btn">Back to Profile</a>
+        <a href="${pageContext.request.contextPath}/user/profile" class="btn"
+          >Back to Profile</a
+        >
       </div>
 
       <c:if test="${not empty success}">
@@ -91,7 +93,11 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <div class="alert alert-danger">${error}</div>
       </c:if>
 
-      <form method="post" action="change-password" id="passwordForm">
+      <form
+        method="post"
+        action="${pageContext.request.contextPath}/user/change-password"
+        id="passwordForm"
+      >
         <div class="form-group">
           <label for="currentPassword">Current Password</label>
           <input

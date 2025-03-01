@@ -94,7 +94,9 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       </form>
 
       <p style="text-align: center; margin-top: 15px">
-        <a href="auth/login">Back to Login</a>
+        <a href="${pageContext.request.contextPath}/auth/login"
+          >Back to Login</a
+        >
       </p>
     </div>
 

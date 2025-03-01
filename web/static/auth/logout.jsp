@@ -9,7 +9,7 @@
     <h1>Logging out...</h1>
     <script>
       setTimeout(function () {
-        window.location.href = "auth/login";
+        window.location.href = "${pageContext.request.contextPath}/auth/login";
       }, 3000);
     </script>
   </body>

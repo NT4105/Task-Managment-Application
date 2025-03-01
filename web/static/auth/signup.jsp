@@ -85,6 +85,7 @@
         var password = document.getElementById("password").value;
         var phone = document.getElementById("phone").value;
         var email = document.getElementById("email").value;
+        var username = document.getElementById("userName").value;
 
         // Basic client-side validation
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -99,6 +100,11 @@
 
         if (password.length < 8) {
           alert("Password must be at least 8 characters long");
+          return false;
+        }
+
+        if (username.length < 6) {
+          alert("Username must be at least 6 characters long");
           return false;
         }
 

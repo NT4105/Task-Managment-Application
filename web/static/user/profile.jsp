@@ -84,6 +84,24 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         background-color: #e9ecef;
         cursor: not-allowed;
       }
+
+      .button-group {
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      .back-btn {
+        display: inline-block;
+        padding: 8px 16px;
+        background-color: #f0f0f0;
+        color: #333;
+        text-decoration: none;
+        border-radius: 4px;
+      }
+
+      .back-btn:hover {
+        background-color: #e0e0e0;
+      }
     </style>
   </head>
   <body>
@@ -179,6 +197,12 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
       <div style="margin-top: 20px">
         <a href="change-password" class="btn">Change Password</a>
+      </div>
+
+      <div class="button-group">
+        <a href="${pageContext.request.contextPath}/home" class="back-btn"
+          >Back to Dashboard</a
+        >
       </div>
     </div>
 

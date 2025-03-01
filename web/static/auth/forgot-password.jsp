@@ -23,7 +23,10 @@
         <p style="color: red">${error}</p>
       </c:if>
 
-      <form method="post" action="auth/forgot-password">
+      <form
+        action="${pageContext.request.contextPath}/auth/forgot-password"
+        method="POST"
+      >
         <input type="hidden" name="step" value="verify" />
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required />
@@ -31,7 +34,11 @@
         <button type="submit">Continue</button>
       </form>
 
-      <p><a href="auth/login">Back to Login</a></p>
+      <p>
+        <a href="${pageContext.request.contextPath}/auth/login"
+          >Back to Login</a
+        >
+      </p>
     </div>
   </body>
 </html>
