@@ -60,13 +60,13 @@ CREATE TABLE Tasks
 CREATE TABLE ProjectMembers
 (
     ProjectID UNIQUEIDENTIFIER NOT NULL,
-    UserId UNIQUEIDENTIFIER NOT NULL,
+    UserID UNIQUEIDENTIFIER NOT NULL,
     JoinedAt DATETIME DEFAULT GETDATE(),
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    PRIMARY KEY (ProjectID, UserId),
+    PRIMARY KEY (ProjectID, UserID),
     FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
-    FOREIGN KEY (UserId) REFERENCES Users(UserID)
+    FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
 -- Add new table for task assignments

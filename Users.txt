@@ -1,9 +1,0 @@
-CREATE TABLE Users(
-     UserID NVARCHAR(8) PRIMARY KEY,
-	 FirstName NVARCHAR(10),
-	 LastName NVARCHAR(10),
-	 UserName NVARCHAR(10) UNIQUE,
-	 Email NVARCHAR(15),
-	 Pass NVARCHAR(10),
-	 Role NVARCHAR(8)
-);
