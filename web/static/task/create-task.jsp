@@ -60,11 +60,17 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         color: red;
         margin-bottom: 10px;
       }
+
+      .button-group {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Create New Task</h1>
+      <h2>Create New Task</h2>
 
       <c:if test="${not empty error}">
         <div class="error-message">${error}</div>
@@ -111,13 +117,14 @@ uri="http://java.sun.com/jsp/jstl/core" %>
           <input type="date" id="dueDate" name="dueDate" required />
         </div>
 
-        <button type="submit" class="btn">Create Task</button>
-        <a
-          href="${pageContext.request.contextPath}/project/details?id=${projectId}"
-          class="btn"
-          style="margin-left: 10px"
-          >Cancel</a
-        >
+        <div class="button-group">
+          <button type="submit" class="btn">Create Task</button>
+          <a
+            href="${pageContext.request.contextPath}/project/details?id=${projectId}"
+            class="back-btn"
+            >Back to Project</a
+          >
+        </div>
       </form>
     </div>
 

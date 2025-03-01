@@ -58,11 +58,17 @@
                 color: red;
                 margin-bottom: 10px;
             }
+
+            .button-group {
+                margin-top: 20px;
+                display: flex;
+                gap: 10px;
+            }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>Update Task</h1>
+            <h2>Update Task</h2>
             
             <c:if test="${not empty error}">
                 <div class="error-message">${error}</div>
@@ -97,15 +103,12 @@
                     <input type="date" id="dueDate" name="dueDate" value="${task.dueDate}" required>
                 </div>
 
-        <button type="submit" class="btn">Update Task</button>
-        <a
-          href="${pageContext.request.contextPath}/project/details?id=${task.projectID}"
-          class="btn"
-          style="margin-left: 10px"
-          >Cancel</a
-        >
-      </form>
-    </div>
+                <div class="button-group">
+                    <button type="submit" class="btn">Update Task</button>
+                    <a href="${pageContext.request.contextPath}/project/details?id=${task.projectID}" class="back-btn">Back to Project</a>
+                </div>
+            </form>
+        </div>
 
         <script>
       // Set minimum date as today

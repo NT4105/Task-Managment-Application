@@ -82,6 +82,25 @@
                 border: 1px solid #ddd;
                 border-radius: 4px;
             }
+
+            .button-group {
+                margin-top: 20px;
+                text-align: right;
+            }
+
+            .back-btn {
+                display: inline-block;
+                padding: 8px 16px;
+                background-color: #f0f0f0;
+                color: #333;
+                text-decoration: none;
+                border-radius: 4px;
+                margin-left: 10px;
+            }
+
+            .back-btn:hover {
+                background-color: #e0e0e0;
+            }
         </style>
     </head>
     <body>
@@ -191,13 +210,9 @@
                 </c:if>
             </div>
 
-            <div style="margin-top: 20px">
-              <a
-                href="${pageContext.request.contextPath}/project/details?id=${task.projectID}"
-                class="btn"
-                >Back to Project</a
-              >
+            <div class="button-group">
+                <a href="${pageContext.request.contextPath}/project/details?id=${task.projectID}" class="back-btn">Back to Project</a>
             </div>
-          </div>
-        </body>
+        </div>
+    </body>
 </html> 
