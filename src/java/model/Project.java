@@ -15,6 +15,7 @@ public class Project {
     private int completedTasks;
     private Date createdAt;
     private Date updatedAt;
+    private List<ProjectMember> projectMembers;
 
     // Constructor
 
@@ -36,11 +37,11 @@ public class Project {
         this.updatedAt = updatedAt;
     }
 
-    public String getprojectID() {
+    public String getProjectID() {
         return projectID;
     }
 
-    public void setprojectID(String projectID) {
+    public void setProjectID(String projectID) {
         this.projectID = projectID;
     }
 
@@ -122,6 +123,36 @@ public class Project {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public List<ProjectMember> getProjectMembers() {
+        return projectMembers;
+    }
+
+    public void setProjectMembers(List<ProjectMember> projectMembers) {
+        this.projectMembers = projectMembers;
+    }
+
+    // Getter for completion percentage
+    public int getCompletionPercentage() {
+        if (totalTasks == 0) {
+            return 0;
+        }
+        return (completedTasks * 100) / totalTasks;
+    }
+
+    public boolean isCompleted() {
+        // Project được coi là hoàn thành khi:
+        // 1. Có ít nhất 1 task
+        // 2. Tất cả các task đều đã hoàn thành
+        return totalTasks > 0 && totalTasks == completedTasks;
+    }
+
+    // Kiểm tra xem project có member nào không
+    public boolean hasTeamMember(String userId) {
+        if (projectMembers == null)
+            return false;
+        return projectMembers.stream().anyMatch(member -> member.getUserId().equals(userId));
     }
 
     @Override
