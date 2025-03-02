@@ -1,4 +1,4 @@
-Create Database TaskManager
+﻿Create Database TaskManager
 use TaskManager
 -- Users table for authentication and basic user information
 CREATE TABLE Users
@@ -35,6 +35,8 @@ CREATE TABLE Projects
     StartDate DATE NOT NULL,
     EndDate DATE,
     ManagerID UNIQUEIDENTIFIER NOT NULL,
+    TotalTasks INT DEFAULT 0,
+    CompletedTasks INT DEFAULT 0,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
     FOREIGN KEY (ManagerID) REFERENCES Users(UserID)
