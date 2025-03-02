@@ -29,25 +29,12 @@ public class Validation {
     }
 
     public static boolean isValidUsername(String username) {
-        if (username.isEmpty()) {
-            System.out.println("Username cannot be empty.");
+        if (username == null || username.trim().isEmpty()) {
             return false;
         }
 
-        if (checkSpace(username)) {
-            System.out.println("Username cannot contain spaces.");
-            return false;
-        }
-
-        if (username.length() < 6 || username.length() > 20) {
-            System.out.println("Username must be between 6 and 20 characters.");
-            return false;
-        }
-        if (username.matches(".*[0-9!@#$%^&*(){}_+\\-=*/.<>?|\\s].*")) {
-            System.out.println("Username cannot contain numbers, special characters, or spaces.");
-            return false;
-        }
-        return true;
+        // Allow letters, numbers, underscore, minimum 4 characters
+        return username.matches("^[a-zA-Z0-9_]{4,20}$");
     }
 
     public static boolean isValidEmail(String email) {
@@ -65,20 +52,23 @@ public class Validation {
             return false;
         }
 
-        // Require at least one digit and one special character
+        boolean hasLetter = false;
         boolean hasDigit = false;
         boolean hasSpecial = false;
-        String specialChars = "!@#$%^&*()_+-=[]{}|;:,.<>?";
 
         for (char c : password.toCharArray()) {
-            if (Character.isDigit(c)) {
+            if (Character.isLetter(c))
+                hasLetter = true;
+            else if (Character.isDigit(c))
                 hasDigit = true;
-            } else if (specialChars.indexOf(c) >= 0) {
+            else
                 hasSpecial = true;
-            }
+
+            if (hasLetter && hasDigit && hasSpecial)
+                return true;
         }
 
-        return hasDigit && hasSpecial;
+        return false;
     }
 
     public static boolean isValidId(int id) {
