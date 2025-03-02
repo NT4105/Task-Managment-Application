@@ -5,17 +5,45 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <title>Forgot Password</title>
     <style>
-      .login-container {
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+
+      .container {
         max-width: 400px;
         margin: 0 auto;
         padding: 20px;
-        border: 1px solid #ccc;
+        background: white;
         border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      input[type="email"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      button {
+        background: #4caf50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
-    <div class="login-container">
+    <div class="container">
       <h2>Forgot Password</h2>
       <p>Enter your email address to reset your password.</p>
 

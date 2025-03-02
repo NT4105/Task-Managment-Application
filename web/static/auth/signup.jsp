@@ -72,8 +72,8 @@
         <br />
         <label for="role">Role:</label>
         <select id="role" name="role" required>
-          <option value="Manager">Manager</option>
-          <option value="Member">Member</option>
+          <option value="MANAGER">Manager</option>
+          <option value="MEMBER">Member</option>
         </select>
         <br />
         <button type="submit">Sign Up</button>
@@ -85,7 +85,7 @@
         var password = document.getElementById("password").value;
         var phone = document.getElementById("phone").value;
         var email = document.getElementById("email").value;
-        var username = document.getElementById("userName").value;
+        var userName = document.getElementById("userName").value;
 
         // Basic client-side validation
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -103,7 +103,7 @@
           return false;
         }
 
-        if (username.length < 6) {
+        if (userName.length < 6) {
           alert("Username must be at least 6 characters long");
           return false;
         }
