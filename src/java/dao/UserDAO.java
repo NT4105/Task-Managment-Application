@@ -13,6 +13,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import model.Profile;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserDAO {
     private static UserDAO instance;
@@ -36,7 +38,7 @@ public class UserDAO {
                 userPs.setString(1, userDTO.getUserID());
                 userPs.setString(2, userDTO.getUserName());
                 userPs.setString(3, Util.encryptPassword(userDTO.getPassword()));
-                userPs.setString(4, userDTO.getRole().getDisplayValue());
+                userPs.setString(4, userDTO.getRole().name());
                 userPs.setDate(5, userDTO.getCreatedAt());
                 userPs.setDate(6, userDTO.getUpdatedAt());
                 userPs.executeUpdate();
@@ -180,30 +182,52 @@ public class UserDAO {
         }
     }
 
-    public String login(String email, String password) {
-        String sql = "SELECT u.UserID, u.Password FROM Users u " +
+    public User login(String userName, String password) {
+        String sql = "SELECT u.*, p.FirstName, p.LastName, p.Email, p.Phone, p.DateOfBirth " +
+                "FROM Users u " +
                 "JOIN Profiles p ON u.UserID = p.UserID " +
-                "WHERE p.Email = ?";
-
+                "WHERE u.Username = ?";
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, email);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String storedHash = rs.getString("Password");
-                    String userId = rs.getString("UserID");
+            Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
+                    "Attempting login for username: {0}", userName);
 
-                    // Use the new verifyPassword method to check the password
-                    if (Util.verifyPassword(password, storedHash)) {
-                        return userId;
-                    }
+            ps.setString(1, userName);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String hashedPassword = rs.getString("Password");
+                Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
+                        "Found user, comparing passwords. Stored hash: {0}", hashedPassword);
+
+                // Verify plain password với hashedPassword từ DB
+                boolean passwordMatch = Util.verifyPassword(password, hashedPassword);
+                Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
+                        "Password verification result: {0}", passwordMatch);
+
+                if (passwordMatch) {
+                    User user = new User();
+                    user.setUserID(rs.getString("UserID"));
+                    user.setUserName(userName);
+                    user.setPassword(hashedPassword);
+                    user.setRole(UserRole.valueOf(rs.getString("Role")));
+                    user.setFirstName(rs.getString("FirstName"));
+                    user.setLastName(rs.getString("LastName"));
+                    user.setEmail(rs.getString("Email"));
+                    user.setPhone(rs.getString("Phone"));
+                    user.setDob(rs.getDate("DateOfBirth"));
+                    return user;
                 }
+            } else {
+                Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
+                        "No user found with username: {0}", userName);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE,
+                    "Database error during login", e);
         }
-        return "";
+        return null;
     }
 
     public User checkAccessToHome(String id) {
@@ -252,12 +276,12 @@ public class UserDAO {
     }
 
     // Add method to check if username exists
-    public boolean checkDuplicateUsername(String username) {
+    public boolean checkDuplicateUsername(String userName) {
         String sql = "SELECT COUNT(*) FROM Users WHERE Username = ?";
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, username);
+            ps.setString(1, userName);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1) == 0;
@@ -314,5 +338,54 @@ public class UserDAO {
             e.printStackTrace();
         }
         return users;
+    }
+
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM Users u JOIN Profiles p ON u.UserID = p.UserID WHERE p.Email = ?";
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, email);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User();
+                user.setUserID(rs.getString("UserID"));
+                user.setUserName(rs.getString("Username"));
+                user.setPassword(rs.getString("Password"));
+                user.setEmail(rs.getString("Email"));
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean resetPassword(String email, String newPassword) {
+        String sql = "UPDATE Users SET Password = ? WHERE Email = ?";
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, Util.encryptPassword(newPassword));
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private User extractUserFromResultSet(ResultSet rs) throws SQLException {
+        User user = new User();
+        user.setUserID(rs.getString("UserID"));
+        user.setUserName(rs.getString("Username"));
+        user.setPassword(rs.getString("Password"));
+        user.setRole(UserRole.fromString(rs.getString("Role")));
+        user.setFirstName(rs.getString("FirstName"));
+        user.setLastName(rs.getString("LastName"));
+        user.setEmail(rs.getString("Email"));
+        user.setPhone(rs.getString("Phone"));
+        user.setDob(rs.getDate("DateOfBirth"));
+        user.setCreatedAt(rs.getDate("CreatedAt"));
+        user.setUpdatedAt(rs.getDate("UpdatedAt"));
+        return user;
     }
 }

@@ -17,11 +17,12 @@ public class UserDTO {
     private String password;
 
     // Constructor
-    public UserDTO(String userID, String userName, String firstName, String lastName,
+    public UserDTO(String userID, String userName, String password, String firstName, String lastName,
             String email, String phone, UserRole role, Date dob,
             Date createdAt, Date updatedAt) {
         this.userID = userID;
         this.userName = userName;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
