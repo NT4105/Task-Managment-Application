@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import model.enums.UserRole;
 
-@WebServlet("/delete-task")
+@WebServlet("/task/delete")
 public class TaskDeleteController extends HttpServlet {
 
     @Override

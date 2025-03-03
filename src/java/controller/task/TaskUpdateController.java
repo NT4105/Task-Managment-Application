@@ -15,7 +15,7 @@ import utils.Validation;
 import java.sql.Date;
 import dao.UserDAO;
 
-@WebServlet("/update-task")
+@WebServlet("/task/update")
 public class TaskUpdateController extends HttpServlet {
 
     @Override
