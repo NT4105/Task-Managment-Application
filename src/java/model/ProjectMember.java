@@ -5,6 +5,8 @@ import java.sql.Date;
 public class ProjectMember {
     private String projectID;
     private String userID;
+    private String firstName;
+    private String lastName;
     private Date joinedAt;
     private Date createdAt;
     private Date updatedAt;
@@ -13,10 +15,12 @@ public class ProjectMember {
     public ProjectMember() {
     }
 
-    public ProjectMember(String projectID, String userID, Date joinedAt,
+    public ProjectMember(String projectID, String userID, String firstName, String lastName, Date joinedAt,
             Date createdAt, Date updatedAt) {
         this.projectID = projectID;
         this.userID = userID;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.joinedAt = joinedAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -37,6 +41,22 @@ public class ProjectMember {
 
     public void setUserId(String userID) {
         this.userID = userID;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Date getJoinedAt() {

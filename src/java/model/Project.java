@@ -134,11 +134,10 @@ public class Project {
     }
 
     // Getter for completion percentage
-    public int getCompletionPercentage() {
-        if (totalTasks == 0) {
+    public double getCompletionPercentage() {
+        if (totalTasks == 0)
             return 0;
-        }
-        return (completedTasks * 100) / totalTasks;
+        return (completedTasks * 100.0) / totalTasks;
     }
 
     public boolean isCompleted() {
