@@ -21,19 +21,14 @@ public class ProfileController extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("auth/login");
             return;
         }
 
         String userId = (String) session.getAttribute("userId");
         User user = UserDAO.getInstance().selectById(userId);
-
-        if (user != null) {
-            request.setAttribute("user", user);
-            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
-        } else {
-            response.sendRedirect("login");
-        }
+        request.setAttribute("user", user);
+        request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
     }
 
     @Override
@@ -41,7 +36,7 @@ public class ProfileController extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("auth/login");
             return;
         }
 
@@ -50,7 +45,7 @@ public class ProfileController extends HttpServlet {
         Profile profile = profileDAO.getProfileByUserId(userId);
 
         if (profile == null) {
-            response.sendRedirect("login");
+            response.sendRedirect("auth/login");
             return;
         }
 
