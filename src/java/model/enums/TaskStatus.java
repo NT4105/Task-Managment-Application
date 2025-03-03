@@ -1,26 +1,38 @@
 package model.enums;
 
 public enum TaskStatus {
-    PENDING("Pending"),
-    IN_PROGRESS("In Progress"),
-    COMPLETED("Completed");
+    PENDING("PENDING"),
+    IN_PROGRESS("IN_PROGRESS"),
+    COMPLETED("COMPLETED");
 
-    private final String displayValue;
+    private final String value;
 
-    TaskStatus(String displayValue) {
-        this.displayValue = displayValue;
+    TaskStatus(String value) {
+        this.value = value;
     }
 
-    public String getDisplayValue() {
-        return displayValue;
+    public String getValue() {
+        return value;
     }
 
     public static TaskStatus fromString(String text) {
+        if (text == null) {
+            return null;
+        }
+
+        String normalizedText = text.toUpperCase().replace(" ", "_");
+
         for (TaskStatus status : TaskStatus.values()) {
-            if (status.displayValue.equalsIgnoreCase(text)) {
+            if (status.name().equals(normalizedText) ||
+                    status.getValue().equals(normalizedText)) {
                 return status;
             }
         }
         throw new IllegalArgumentException("No constant with text " + text + " found");
+    }
+
+    @Override
+    public String toString() {
+        return this.value;
     }
 }

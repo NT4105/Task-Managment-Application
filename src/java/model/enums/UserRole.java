@@ -1,8 +1,8 @@
 package model.enums;
 
 public enum UserRole {
-    MANAGER("Manager"),
-    MEMBER("Member");
+    MANAGER("MANAGER"),
+    MEMBER("MEMBER");
 
     private final String displayValue;
 
@@ -22,5 +22,10 @@ public enum UserRole {
             }
         }
         throw new IllegalArgumentException("No constant with text " + text + " found");
+    }
+
+    @Override
+    public String toString() {
+        return this.displayValue;
     }
 }
