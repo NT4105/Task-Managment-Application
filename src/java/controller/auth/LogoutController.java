@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/logout")
+@WebServlet("/auth/logout")
 public class LogoutController extends HttpServlet {
 
     @Override
@@ -18,6 +18,6 @@ public class LogoutController extends HttpServlet {
         if (session != null) {
             session.invalidate(); // Destroy the session
         }
-        response.sendRedirect(request.getContextPath() + "/login");
+        response.sendRedirect(request.getContextPath() + "/auth/login");
     }
 }
