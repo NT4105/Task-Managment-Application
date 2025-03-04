@@ -59,7 +59,7 @@ public class ChangePasswordController extends HttpServlet {
         UserDAO userDAO = UserDAO.getInstance();
         User user = userDAO.selectById(userId);
 
-        if (user != null && user.getPassword().equals(Util.encryptPassword(currentPassword))) {
+        if (user != null && Util.verifyPassword(currentPassword, user.getPassword())) {
             user.setPassword(Util.encryptPassword(newPassword));
             if (userDAO.updatePassword(user)) {
                 request.setAttribute("success", "Password changed successfully");
