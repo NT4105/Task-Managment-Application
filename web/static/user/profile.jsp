@@ -14,10 +14,10 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       }
 
       .profile-container {
-        max-width: 800px;
+        max-width: 600px;
         margin: 0 auto;
         background-color: white;
-        padding: 20px;
+        padding: 30px;
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
@@ -26,25 +26,27 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
       }
 
       .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
       }
 
       .form-group label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         font-weight: bold;
+        color: #333;
       }
 
       .form-group input {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        padding: 10px;
+        border: 1x solid #ddd;
+        border-radius: 6px;
         box-sizing: border-box;
+        font-size: 14px;
       }
 
       .btn {
@@ -58,8 +60,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         display: inline-block;
       }
 
-      .btn-danger {
-        background-color: #dc3545;
+      .btn:hover {
+        background-color: #365899;
       }
 
       .alert {
@@ -108,7 +110,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <div class="profile-container">
       <div class="header">
         <h1>Profile</h1>
-        <a href="home" class="btn">Back to Home</a>
+        <a href="home" class="btn">Back to Dashboard</a>
       </div>
 
       <c:if test="${not empty success}">
@@ -119,7 +121,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <div class="alert alert-danger">${error}</div>
       </c:if>
 
-      <form method="post" action="profile">
+      <form method="post" action="profile" id="profileForm">
         <div class="form-group">
           <label for="userName">Username</label>
           <input
@@ -178,6 +180,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             name="phone"
             value="${user.phone}"
             required
+            pattern="[0-9]{10}"
+            title="Phone number must be 10 digits"
           />
         </div>
 
@@ -196,23 +200,53 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       </form>
 
       <div style="margin-top: 20px">
-        <a href="change-password" class="btn">Change Password</a>
-      </div>
-
-      <div class="button-group">
-        <a href="${pageContext.request.contextPath}/home" class="back-btn"
-          >Back to Dashboard</a
+        <a
+          href="${pageContext.request.contextPath}/user/change-password"
+          class="btn"
+          >Change Password</a
         >
       </div>
     </div>
 
     <script>
-      // Add client-side validation if needed
-      document.querySelector("form").addEventListener("submit", function (e) {
-        const phone = document.getElementById("phone").value;
-        if (!/^\d{10}$/.test(phone)) {
+      // Track form changes
+      document
+        .getElementById("profileForm")
+        .addEventListener("change", function () {
+          const currentFormData = new FormData(this);
+          for (let pair of currentFormData.entries()) {
+            const input = document.getElementById(pair[0]);
+            if (input && input.defaultValue !== pair[1]) {
+              formChanged = true;
+              return;
+            }
+          }
+          formChanged = false;
+        });
+
+      // Reset formChanged when form submits successfully
+      document
+        .getElementById("profileForm")
+        .addEventListener("submit", function (e) {
+          const phone = document.getElementById("phone").value;
+          if (!/^[0-9]{10}$/.test(phone)) {
+            e.preventDefault();
+            alert("Phone number must be exactly 10 digits");
+            return;
+          }
+          formChanged = false;
+          const inputs = this.getElementsByTagName("input");
+          for (let input of inputs) {
+            input.defaultValue = input.value;
+          }
+        });
+
+      // Only handle beforeunload event for browser's "Leave site" warning
+      window.addEventListener("beforeunload", function (e) {
+        if (formChanged) {
           e.preventDefault();
-          alert("Phone number must be 10 digits");
+          e.returnValue = ""; // Modern browsers will show their own message
+          return "";
         }
       });
     </script>
