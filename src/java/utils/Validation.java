@@ -43,8 +43,8 @@ public class Validation {
         }
 
         // Basic email validation pattern
-        String emailPattern = "^[A-Za-z0-9+_.-]+@(.+)$";
-        return email.matches(emailPattern);
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return email.matches(emailRegex);
     }
 
     public static boolean isValidPassword(String password) {
@@ -89,30 +89,29 @@ public class Validation {
     }
 
     public static boolean isValidDate(String date) {
+        if (date == null || date.isEmpty()) {
+            return false;
+        }
+
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            sdf.setLenient(false);
-            sdf.parse(date);
+            java.sql.Date.valueOf(date);
             return true;
-        } catch (Exception e) {
-            System.out.println("Invalid date format. Use YYY-MM-DD");
+        } catch (IllegalArgumentException e) {
             return false;
         }
     }
 
     public static boolean isValidPhone(String phone) {
-        if (phone.isEmpty()) {
-            System.out.println("Phone cannot be empty.");
+        // Skip validation if phone is unchanged (null or empty)
+        if (phone == null || phone.isEmpty()) {
             return false;
         }
 
-        if (checkSpace(phone)) {
-            System.out.println("Phone number cannot contain spaces.");
-            return false;
-        }
+        // Remove any whitespace
+        phone = phone.trim();
 
+        // Check for exactly 10 digits
         if (!phone.matches("^\\d{10}$")) {
-            System.out.println("Phone number must be 10 digits long.");
             return false;
         }
 
