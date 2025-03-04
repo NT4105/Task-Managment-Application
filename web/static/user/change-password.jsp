@@ -80,7 +80,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <div class="container">
       <div class="header">
         <h1>Change Password</h1>
-        <a href="${pageContext.request.contextPath}/user/profile" class="btn"
+        <a href="${pageContext.request.contextPath}/profile" class="btn"
           >Back to Profile</a
         >
       </div>
