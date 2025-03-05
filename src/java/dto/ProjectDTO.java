@@ -1,6 +1,7 @@
 package dto;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import model.enums.TaskStatus;
 
@@ -8,13 +9,13 @@ public class ProjectDTO {
     private String projectID;
     private String projectName;
     private String description;
-    private Date startDate;
+    private Date startDate; // Start date & end date are just get mm/dd/yyyy format
     private Date endDate;
     private String managerID;
     private List<String> teamMemberIDs;
     private List<TaskDTO> tasks;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     // Thêm method để tính toán động
     public int getTotalTasks() {
@@ -38,7 +39,7 @@ public class ProjectDTO {
     public ProjectDTO(String projectID, String projectName, String description,
             Date startDate, Date endDate, String managerID,
             List<String> teamMemberIDs, List<TaskDTO> tasks,
-            Date createdAt, Date updatedAt) {
+            Timestamp createdAt, Timestamp updatedAt) {
         this.projectID = projectID;
         this.projectName = projectName;
         this.description = description;
@@ -116,19 +117,19 @@ public class ProjectDTO {
         this.tasks = tasks;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

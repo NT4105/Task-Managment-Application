@@ -2,6 +2,7 @@ package dto;
 
 import model.enums.TaskStatus;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class TaskDTO {
     private String taskID;
@@ -13,14 +14,14 @@ public class TaskDTO {
     private String assignedUserID;
     private String projectName;
     private int progress;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     // Constructor
     public TaskDTO(String taskID, String projectID, String taskName,
             String description, TaskStatus status, Date dueDate,
             String assignedUserID, String projectName, int progress,
-            Date createdAt, Date updatedAt) {
+            Timestamp createdAt, Timestamp updatedAt) {
         this.taskID = taskID;
         this.projectID = projectID;
         this.taskName = taskName;
@@ -107,19 +108,19 @@ public class TaskDTO {
         this.progress = progress;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 }

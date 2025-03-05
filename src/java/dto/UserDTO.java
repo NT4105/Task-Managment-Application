@@ -1,7 +1,9 @@
 package dto;
 
 import model.enums.UserRole;
+import java.sql.Timestamp;
 import java.sql.Date;
+import model.User;
 
 public class UserDTO {
     private String userID;
@@ -12,14 +14,14 @@ public class UserDTO {
     private String phone;
     private UserRole role;
     private Date dob;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     private String password;
 
     // Constructor
     public UserDTO(String userID, String userName, String password, String firstName, String lastName,
             String email, String phone, UserRole role, Date dob,
-            Date createdAt, Date updatedAt) {
+            Timestamp createdAt, Timestamp updatedAt) {
         this.userID = userID;
         this.userName = userName;
         this.password = password;
@@ -98,19 +100,19 @@ public class UserDTO {
         this.dob = dob;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -120,5 +122,21 @@ public class UserDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    // Add method to convert to User entity
+    public User toUser() {
+        User user = new User();
+        user.setUserID(this.userID);
+        user.setUserName(this.userName);
+        user.setFirstName(this.firstName);
+        user.setLastName(this.lastName);
+        user.setEmail(this.email);
+        user.setPhone(this.phone);
+        user.setRole(this.role);
+        user.setDob(this.dob);
+        user.setCreatedAt(Timestamp.valueOf(this.createdAt.toLocalDateTime()));
+        user.setUpdatedAt(Timestamp.valueOf(this.updatedAt.toLocalDateTime()));
+        return user;
     }
 }
