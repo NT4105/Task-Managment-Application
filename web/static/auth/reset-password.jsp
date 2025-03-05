@@ -10,7 +10,8 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 20px;
-        background-color: #f0f2f5;
+        background-color: #f5f5f5;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -18,44 +19,89 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       }
 
       .container {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        width: 100%;
         max-width: 400px;
+        margin: 0 auto;
+        padding: 40px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      h2 {
+        color: #4267b2;
+        margin-bottom: 30px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
 
       .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+        text-align: left;
       }
 
-      .form-group label {
-        display: block;
-        margin-bottom: 5px;
-      }
-
-      .form-group input {
+      input[type="password"] {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        padding: 12px;
+        border: 2px solid #e1e1e1;
+        border-radius: 6px;
         box-sizing: border-box;
+        transition: border-color 0.3s ease;
       }
 
-      .btn {
-        background-color: #1877f2;
+      input[type="password"]:focus {
+        border-color: #4267b2;
+        outline: none;
+      }
+
+      button {
+        background: #4267b2;
         color: white;
-        padding: 10px 15px;
+        padding: 12px 24px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
         width: 100%;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
       }
 
-      .error {
-        color: red;
-        margin-bottom: 10px;
+      button:hover {
+        background-color: #365899;
+      }
+
+      .success-message {
+        color: #28a745;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .error-message {
+        color: #dc3545;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+      }
+
+      .back-to-login {
+        margin-top: 30px;
+        text-align: center;
+      }
+
+      .back-to-login a {
+        color: #1877f2;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .back-to-login a:hover {
+        text-decoration: underline;
       }
     </style>
   </head>
@@ -64,40 +110,50 @@ uri="http://java.sun.com/jsp/jstl/core" %>
       <h2>Reset Password</h2>
 
       <c:if test="${not empty error}">
-        <div class="error">${error}</div>
+        <div class="error-message">${error}</div>
       </c:if>
 
-      <form
-        method="post"
-        action="forgot-password"
-        onsubmit="return validateForm()"
-      >
-        <input type="hidden" name="step" value="reset" />
-        <input type="hidden" name="email" value="${email}" />
+      <c:if test="${not empty success}">
+        <div class="success-message">${success}</div>
+      </c:if>
 
-        <div class="form-group">
-          <label for="newPassword">New Password:</label>
-          <input type="password" id="newPassword" name="newPassword" required />
-        </div>
-
-        <div class="form-group">
-          <label for="confirmPassword">Confirm Password:</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            required
-          />
-        </div>
-
-        <button type="submit" class="btn">Reset Password</button>
-      </form>
-
-      <p style="text-align: center; margin-top: 15px">
-        <a href="${pageContext.request.contextPath}/auth/login"
-          >Back to Login</a
+      <c:if test="${empty success}">
+        <form
+          method="post"
+          action="${pageContext.request.contextPath}/auth/forgot-password"
+          onsubmit="return validateForm()"
         >
-      </p>
+          <input type="hidden" name="step" value="reset" />
+
+          <div class="form-group">
+            <label for="newPassword">New Password:</label>
+            <input
+              type="password"
+              id="newPassword"
+              name="newPassword"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              required
+            />
+          </div>
+
+          <button type="submit" class="btn">Reset Password</button>
+        </form>
+      </c:if>
+
+      <div class="back-to-login">
+        <a href="${pageContext.request.contextPath}/auth/login"
+          >Return to Login</a
+        >
+      </div>
     </div>
 
     <script>
