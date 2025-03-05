@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class Project {
@@ -13,17 +14,19 @@ public class Project {
     private String managerId;
     private int totalTasks;
     private int completedTasks;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     private List<ProjectMember> projectMembers;
-
+    private String encodedId;
     // Constructor
 
     public Project() {
     }
 
     public Project(String projectID, String projectName, String description, List<Task> tasks, Date startDate,
-            Date endDate, String managerId, int totalTasks, int completedTasks, Date createdAt, Date updatedAt) {
+            Date endDate, String managerId, int totalTasks, int completedTasks, Timestamp createdAt,
+            Timestamp updatedAt,
+            String encodedId) {
         this.projectID = projectID;
         this.projectName = projectName;
         this.description = description;
@@ -35,6 +38,7 @@ public class Project {
         this.completedTasks = completedTasks;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.encodedId = encodedId;
     }
 
     public String getProjectID() {
@@ -109,20 +113,28 @@ public class Project {
         this.completedTasks = completedTasks;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getEncodedId() {
+        return encodedId;
+    }
+
+    public void setEncodedId(String encodedId) {
+        this.encodedId = encodedId;
     }
 
     public List<ProjectMember> getProjectMembers() {
@@ -159,7 +171,7 @@ public class Project {
         return "Project{" + "projectID=" + projectID + ", projectName=" + projectName + ", description=" + description
                 + ", tasks=" + tasks + ", startDate=" + startDate + ", endDate=" + endDate + ", managerId=" + managerId
                 + ", totalTasks=" + totalTasks + ", completedTasks=" + completedTasks + ", createdAt=" + createdAt
-                + ", updatedAt=" + updatedAt + '}';
+                + ", updatedAt=" + updatedAt + ", encodedId=" + encodedId + '}';
     }
 
 }

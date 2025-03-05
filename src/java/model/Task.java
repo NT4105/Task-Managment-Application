@@ -2,6 +2,7 @@ package model;
 
 import model.enums.TaskStatus;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -15,9 +16,10 @@ public class Task {
     private List<String> assignedUsers; // changed from single assignedTo
     private String submissionLink;
     private String submissionFilePath;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     private List<TaskAssignment> assignments; // Add this field to track assignments
+    private String encodedId;
 
     // Constructor
     public Task() {
@@ -25,8 +27,8 @@ public class Task {
     }
 
     public Task(String taskID, String projectID, String taskName, String description, TaskStatus status, Date dueDate,
-            List<String> assignedUsers, String submissionLink, String submissionFilePath, Date createdAt,
-            Date updatedAt) {
+            List<String> assignedUsers, String submissionLink, String submissionFilePath, Timestamp createdAt,
+            Timestamp updatedAt) {
         this.taskID = taskID;
         this.projectID = projectID;
         this.taskName = taskName;
@@ -113,20 +115,28 @@ public class Task {
         this.submissionFilePath = submissionFilePath;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getEncodedId() {
+        return encodedId;
+    }
+
+    public void setEncodedId(String encodedId) {
+        this.encodedId = encodedId;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class ProjectMember {
     private String projectID;
@@ -8,15 +9,15 @@ public class ProjectMember {
     private String firstName;
     private String lastName;
     private Date joinedAt;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     // Constructors
     public ProjectMember() {
     }
 
     public ProjectMember(String projectID, String userID, String firstName, String lastName, Date joinedAt,
-            Date createdAt, Date updatedAt) {
+            Timestamp createdAt, Timestamp updatedAt) {
         this.projectID = projectID;
         this.userID = userID;
         this.firstName = firstName;
@@ -67,19 +68,19 @@ public class ProjectMember {
         this.joinedAt = joinedAt;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 

@@ -1,6 +1,8 @@
 package model;
 
+import java.sql.Timestamp;
 import java.sql.Date;
+import java.util.Objects;
 
 public class Profile {
     private String profileID;
@@ -10,8 +12,8 @@ public class Profile {
     private String email;
     private String phone;
     private Date dob;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     // Constructors
     public Profile() {
@@ -19,7 +21,7 @@ public class Profile {
 
     public Profile(String profileID, String userID, String firstName,
             String lastName, String email, String phone,
-            Date dob, Date createdAt, Date updatedAt) {
+            Date dob, Timestamp createdAt, Timestamp updatedAt) {
         this.profileID = profileID;
         this.userID = userID;
         this.firstName = firstName;
@@ -29,6 +31,15 @@ public class Profile {
         this.dob = dob;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    // Method để kiểm tra xem có thay đổi so với profile khác không
+    public boolean hasChanges(Profile other) {
+        return !Objects.equals(this.firstName, other.firstName) ||
+                !Objects.equals(this.lastName, other.lastName) ||
+                !Objects.equals(this.email, other.email) ||
+                !Objects.equals(this.phone, other.phone) ||
+                !Objects.equals(this.dob, other.dob);
     }
 
     // Getters and setters
@@ -88,19 +99,19 @@ public class Profile {
         this.dob = dob;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 

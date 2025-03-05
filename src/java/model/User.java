@@ -1,6 +1,7 @@
 package model;
 
 import model.enums.UserRole;
+import java.sql.Timestamp;
 import java.sql.Date;
 
 public class User {
@@ -8,8 +9,8 @@ public class User {
     private String userName;
     private String password;
     private UserRole role;
-    private Date createdAt;
-    private Date updatedAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
     private String firstName;
     private String lastName;
     private String email;
@@ -20,7 +21,7 @@ public class User {
     }
 
     public User(String UserID, String userName, String password, UserRole role,
-            Date createdAt, Date updatedAt) {
+            Timestamp createdAt, Timestamp updatedAt) {
         this.UserID = UserID;
         this.userName = userName;
         this.password = password;
@@ -61,19 +62,19 @@ public class User {
         this.role = role;
     }
 
-    public Date getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public Timestamp getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
     }
 
