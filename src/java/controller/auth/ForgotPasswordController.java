@@ -9,75 +9,63 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-@WebServlet("/forgot-password")
+@WebServlet("/auth/forgot-password")
 public class ForgotPasswordController extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        String step = request.getParameter("step");
-        String email = request.getParameter("email");
+        String step = req.getParameter("step");
+        HttpSession session = req.getSession(false);
 
-        if ("reset".equals(step) && email != null) {
-            request.setAttribute("email", email);
-            request.getRequestDispatcher("/static/auth/reset-password.jsp").forward(request, response);
+        if (step != null && step.equals("reset") && session != null && session.getAttribute("resetEmail") != null) {
+            req.getRequestDispatcher("/static/auth/reset-password.jsp").forward(req, resp);
         } else {
-            request.getRequestDispatcher("/static/auth/forgot-password.jsp").forward(request, response);
+            req.getRequestDispatcher("/static/auth/forgot-password.jsp").forward(req, resp);
         }
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        String email = request.getParameter("email");
-        String step = request.getParameter("step");
+        String step = req.getParameter("step");
+        HttpSession session = req.getSession();
 
-        if ("verify".equals(step)) {
-            // Xác thực email
-            if (!Validation.isValidEmail(email)) {
-                request.setAttribute("error", "Invalid email format");
-                request.getRequestDispatcher("/static/auth/forgot-password.jsp").forward(request, response);
-                return;
-            }
-
-            UserDAO userDAO = UserDAO.getInstance();
-            User user = userDAO.getUserByEmail(email);
-
+        if (step.equals("verify")) {
+            String email = req.getParameter("email");
+            User user = UserDAO.getInstance().getUserByEmail(email);
             if (user != null) {
-                // Email tồn tại, chuyển đến trang reset password
-                response.sendRedirect("forgot-password?step=reset&email=" + email);
+                session.setAttribute("resetEmail", email);
+                resp.sendRedirect(req.getContextPath() + "/auth/forgot-password?step=reset");
             } else {
-                request.setAttribute("error", "Email not found");
-                request.getRequestDispatcher("/static/auth/forgot-password.jsp").forward(request, response);
+                req.setAttribute("error", "Email not found");
+                req.getRequestDispatcher("/static/auth/forgot-password.jsp").forward(req, resp);
             }
-        } else if ("reset".equals(step)) {
-            // Reset password
-            String newPassword = request.getParameter("newPassword");
-            String confirmPassword = request.getParameter("confirmPassword");
+        } else if (step.equals("reset")) {
+            String email = (String) session.getAttribute("resetEmail");
+            String newPassword = req.getParameter("newPassword");
+            String confirmPassword = req.getParameter("confirmPassword");
 
-            if (!Validation.isValidPassword(newPassword)) {
-                request.setAttribute("error", "Password must be at least 8 characters");
-                request.setAttribute("email", email);
-                request.getRequestDispatcher("/static/auth/reset-password.jsp").forward(request, response);
+            if (email == null) {
+                resp.sendRedirect(req.getContextPath() + "/auth/forgot-password");
                 return;
             }
 
-            if (!newPassword.equals(confirmPassword)) {
-                request.setAttribute("error", "Passwords do not match");
-                request.setAttribute("email", email);
-                request.getRequestDispatcher("/static/auth/reset-password.jsp").forward(request, response);
-                return;
-            }
-
-            UserDAO userDAO = UserDAO.getInstance();
-            if (userDAO.resetPassword(email, newPassword)) {
-                request.setAttribute("success", "Password has been reset successfully");
-                request.getRequestDispatcher("/static/auth/login.jsp").forward(request, response);
+            if (newPassword.equals(confirmPassword)) {
+                if (UserDAO.getInstance().resetPassword(email, newPassword)) {
+                    session.removeAttribute("resetEmail");
+                    req.setAttribute("success",
+                            "Password has been reset successfully! You can now login with your new password.");
+                    req.getRequestDispatcher("/static/auth/reset-password.jsp").forward(req, resp);
+                } else {
+                    req.setAttribute("error", "Failed to reset password");
+                    req.getRequestDispatcher("/static/auth/reset-password.jsp").forward(req, resp);
+                }
             } else {
-                request.setAttribute("error", "Failed to reset password");
-                request.setAttribute("email", email);
-                request.getRequestDispatcher("/static/auth/reset-password.jsp").forward(request, response);
+                req.setAttribute("error", "Passwords do not match");
+                req.getRequestDispatcher("/static/auth/reset-password.jsp").forward(req, resp);
             }
         }
     }
