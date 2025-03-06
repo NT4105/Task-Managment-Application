@@ -6,7 +6,7 @@ CREATE TABLE Users
     UserID UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
     Username NVARCHAR(50) UNIQUE NOT NULL,
     Password NVARCHAR(255) NOT NULL,
-    Role NVARCHAR(20) CHECK (Role IN ('Manager', 'Member')) NOT NULL,
+    Role NVARCHAR(20) CHECK (Role IN ('MANAGER', 'MEMBER')) NOT NULL,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE()
 );
@@ -39,7 +39,11 @@ CREATE TABLE Projects
     CompletedTasks INT DEFAULT 0,
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (ManagerID) REFERENCES Users(UserID)
+    FOREIGN KEY (ManagerID) REFERENCES Users(UserID),
+    CONSTRAINT CHK_Project_Dates CHECK (
+        StartDate >= CAST(GETDATE() AS DATE)
+        AND (EndDate IS NULL OR EndDate >= StartDate)
+    )
 );
 
 -- Tasks table
@@ -49,16 +53,21 @@ CREATE TABLE Tasks
     ProjectID UNIQUEIDENTIFIER NOT NULL,
     TaskName NVARCHAR(100) NOT NULL,
     Description NVARCHAR(MAX),
-    Status NVARCHAR(20) CHECK (Status IN ('Pending', 'In Progress', 'Completed')) DEFAULT 'Pending',
-    DueDate DATE,
+    Status NVARCHAR(20) CHECK (Status IN ('PENDING', 'IN_PROGRESS', 'COMPLETED')) DEFAULT 'PENDING',
+    DueDate DATE NOT NULL,
     AssignedTo UNIQUEIDENTIFIER,
+    SubmissionLink NVARCHAR(255),
+    SubmissionFilePath NVARCHAR(255),
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
-    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
-    FOREIGN KEY (AssignedTo) REFERENCES Users(UserID)
+    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID) ON DELETE CASCADE,
+    FOREIGN KEY (AssignedTo) REFERENCES Users(UserID),
+    CONSTRAINT CHK_Task_DueDate CHECK (
+        DueDate >= CAST(GETDATE() AS DATE)
+    )
 );
 
--- Project Members table (for managing team members in projects)
+-- ProjectMembers table for many-to-many relationship between Projects and Users
 CREATE TABLE ProjectMembers
 (
     ProjectID UNIQUEIDENTIFIER NOT NULL,
@@ -67,30 +76,48 @@ CREATE TABLE ProjectMembers
     CreatedAt DATETIME DEFAULT GETDATE(),
     UpdatedAt DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (ProjectID, UserID),
-    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID),
+    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID) ON DELETE CASCADE,
     FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
--- Add new table for task assignments
+-- TaskAssignments table for tracking task assignments and submissions
 CREATE TABLE TaskAssignments
 (
     TaskID UNIQUEIDENTIFIER,
     UserID UNIQUEIDENTIFIER,
-    Status NVARCHAR(20) DEFAULT 'PENDING',
-    SubmissionLink NVARCHAR(MAX),
-    SubmissionFilePath NVARCHAR(MAX),
+    Status NVARCHAR(20) CHECK (Status IN ('PENDING', 'IN_PROGRESS', 'COMPLETED')) DEFAULT 'PENDING',
+    SubmissionLink NVARCHAR(255),
+    SubmissionFilePath NVARCHAR(255),
     AssignedAt DATETIME DEFAULT GETDATE(),
     CompletedAt DATETIME,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    UpdatedAt DATETIME DEFAULT GETDATE(),
     PRIMARY KEY (TaskID, UserID),
-    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID),
-    FOREIGN KEY (UserID) REFERENCES Users(UserID)
+    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID) ON DELETE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES Users(UserID),
+    CONSTRAINT CHK_Assignment_CompletedAt CHECK (
+        CompletedAt IS NULL OR CompletedAt >= AssignedAt
+    )
 );
 
--- Add submission columns to Tasks table
-ALTER TABLE Tasks ADD
-    SubmissionLink NVARCHAR(MAX),
-    SubmissionFilePath NVARCHAR(MAX);
+-- Create mapping tables for encoded IDs
+CREATE TABLE ProjectIdMapping
+(
+    ProjectID UNIQUEIDENTIFIER NOT NULL,
+    EncodedProjectID NVARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    PRIMARY KEY (EncodedProjectID),
+    FOREIGN KEY (ProjectID) REFERENCES Projects(ProjectID)
+);
 
+CREATE TABLE TaskIdMapping
+(
+    TaskID UNIQUEIDENTIFIER NOT NULL,
+    EncodedTaskID NVARCHAR(255) NOT NULL,
+    CreatedAt DATETIME DEFAULT GETDATE(),
+    PRIMARY KEY (EncodedTaskID),
+    FOREIGN KEY (TaskID) REFERENCES Tasks(TaskID)
+);
 -- Trigger để tự động cập nhật UpdatedAt khi dữ liệu thay đổi
 GO
 CREATE TRIGGER TR_Users_UpdateTimestamp ON Users AFTER UPDATE AS
@@ -168,7 +195,7 @@ BEGIN
             SELECT COUNT(*)
     FROM Tasks
     WHERE Tasks.ProjectID = Projects.ProjectID
-        AND Tasks.Status = 'Completed'
+        AND Tasks.Status = 'COMPLETED'
         )
     WHERE Projects.ProjectID IN (SELECT ProjectID
     FROM @AffectedProjects)
@@ -181,14 +208,12 @@ ON TaskAssignments
 AFTER UPDATE
 AS
 BEGIN
-    -- Kiểm tra nếu có bản ghi vừa được cập nhật thành COMPLETED
     IF EXISTS (
         SELECT 1
     FROM inserted i
     WHERE i.Status = 'COMPLETED'
     )
     BEGIN
-        -- Lấy TaskID từ bản ghi vừa được cập nhật
         DECLARE @TaskID UNIQUEIDENTIFIER;
         SELECT @TaskID = TaskID
         FROM inserted;
@@ -207,3 +232,70 @@ BEGIN
             AND Status = 'IN_PROGRESS';
     END
 END;
+
+GO
+CREATE TRIGGER trg_ProjectMapping
+ON Projects
+AFTER INSERT
+AS
+BEGIN
+    -- Insert mappings for all inserted projects
+    INSERT INTO ProjectIdMapping
+        (ProjectID, EncodedProjectID)
+    SELECT
+        i.ProjectID,
+        REPLACE(
+            REPLACE(
+                REPLACE(
+                    CAST('' AS XML).value(
+                        'xs:base64Binary(xs:hexBinary(sql:column("encrypted")))',
+                        'VARCHAR(MAX)'
+                    ),
+                    '+', '-'
+                ),
+                '/', '_'
+            ),
+            '=', ''
+        )
+    FROM inserted i
+    CROSS APPLY (
+        SELECT HASHBYTES('SHA2_256', CONCAT(i.ProjectID, 'your-secret-salt', 'PROJECT')) as encrypted
+    ) t;
+END;
+
+
+GO
+CREATE TRIGGER trg_TaskMapping
+ON Tasks
+AFTER INSERT
+AS
+BEGIN
+    -- Insert mappings for all inserted tasks
+    INSERT INTO TaskIdMapping
+        (TaskID, EncodedTaskID)
+    SELECT
+        i.TaskID,
+        REPLACE(
+            REPLACE(
+                REPLACE(
+                    CAST('' AS XML).value(
+                        'xs:base64Binary(xs:hexBinary(sql:column("encrypted")))',
+                        'VARCHAR(MAX)'
+                    ),
+                    '+', '-'
+                ),
+                '/', '_'
+            ),
+            '=', ''
+        )
+    FROM inserted i
+    CROSS APPLY (
+        SELECT HASHBYTES('SHA2_256', CONCAT(i.TaskID, 'your-secret-salt', 'TASK')) as encrypted
+    ) t;
+END;
+
+
+
+-- Insert sample users (password: "@Password123" hashed with BCrypt)
+select * from ProjectIdMapping
+select * from TaskIdMapping
