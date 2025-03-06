@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 
 @WebServlet("/auth/login")
 public class LoginController extends HttpServlet {
-    private static final Logger LOGGER = Logger.getLogger(LoginController.class.getName());
     private static final int MAX_LOGIN_ATTEMPTS = 3;
     private static final Map<String, Integer> loginAttempts = new ConcurrentHashMap<>();
 
@@ -39,17 +38,14 @@ public class LoginController extends HttpServlet {
             // Basic validation
             if (userName == null || userName.trim().isEmpty() ||
                     password == null || password.trim().isEmpty()) {
-                LOGGER.log(Level.WARNING, "Empty username or password");
                 req.setAttribute("error", "Username and password are required");
                 req.getRequestDispatcher("/static/auth/login.jsp").forward(req, resp);
                 return;
             }
 
-            // Gọi trực tiếp login với password chưa hash
             User user = UserDAO.getInstance().login(userName, password);
 
             if (user != null) {
-                // Set up session
                 HttpSession session = req.getSession(true);
                 session.setAttribute("userId", user.getUserID());
                 session.setAttribute("userName", user.getUserName());

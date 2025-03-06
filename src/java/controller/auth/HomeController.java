@@ -1,46 +1,82 @@
 package controller.auth;
 
+import dao.ProjectDAO;
 import dao.UserDAO;
+import model.Project;
 import model.User;
+import model.enums.UserRole;
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @WebServlet("/home")
 public class HomeController extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        HttpSession session = request.getSession(false);
+        private static final Logger LOGGER = Logger.getLogger(HomeController.class.getName());
 
-        // Check if user is logged in
-        if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+        @Override
+        protected void doGet(HttpServletRequest request, HttpServletResponse response)
+                        throws ServletException, IOException {
+                HttpSession session = request.getSession(false);
+                String userRole = (String) session.getAttribute("userRole");
+                String userId = (String) session.getAttribute("userId");
 
-        // Get user information
-        String userId = (String) session.getAttribute("userId");
-        User user = UserDAO.getInstance().selectById(userId);
+                List<Project> projects;
+                if (UserRole.MANAGER.name().equals(userRole)) {
+                        projects = ProjectDAO.getInstance().getProjectsWithTaskInfo(userId);
+                        LOGGER.info("Found " + projects.size() + " projects for manager");
+                        for (Project project : projects) {
+                                LOGGER.info("Project ID: " + project.getProjectID() +
+                                                ", Name: " + project.getProjectName());
+                        }
+                } else {
+                        projects = ProjectDAO.getInstance().getProjectsWithTaskInfo(userId);
+                }
 
-        if (user != null) {
-            request.setAttribute("user", user);
+                // Filter projects if search parameters are present
+                String searchQuery = request.getParameter("searchQuery");
+                String status = request.getParameter("status");
 
-            // Redirect based on role
-            if ("Manager".equals(user.getRole())) {
+                if (searchQuery != null && !searchQuery.trim().isEmpty()) {
+                        projects = projects.stream()
+                                        .filter(p -> p.getProjectName().toLowerCase()
+                                                        .contains(searchQuery.toLowerCase()) ||
+                                                        p.getDescription().toLowerCase()
+                                                                        .contains(searchQuery.toLowerCase()))
+                                        .collect(Collectors.toList());
+                }
+
+                if (status != null && !status.isEmpty()) {
+                        projects = projects.stream().filter(p -> {
+                                if ("completed".equals(status.toLowerCase())) {
+                                        return p.isCompleted();
+                                } else if ("active".equals(status.toLowerCase())) {
+                                        return !p.isCompleted();
+                                }
+                                return true;
+                        }).collect(Collectors.toList());
+                }
+
+                // Calculate dashboard statistics
+                int totalProjects = projects.size();
+                int activeProjects = (int) projects.stream()
+                                .filter(p -> !p.isCompleted())
+                                .count();
+                int completedProjects = totalProjects - activeProjects;
+
+                // Set attributes for dashboard
+                request.setAttribute("projects", projects);
+                request.setAttribute("totalProjects", totalProjects);
+                request.setAttribute("activeProjects", activeProjects);
+                request.setAttribute("completedProjects", completedProjects);
+
                 request.getRequestDispatcher("/static/home/manager-home.jsp").forward(request, response);
-            } else {
-                request.getRequestDispatcher("/static/home/member-home.jsp").forward(request, response);
-            }
-        } else {
-            // Invalid user in session
-            session.invalidate();
-            response.sendRedirect(request.getContextPath() + "/login");
         }
-    }
 }

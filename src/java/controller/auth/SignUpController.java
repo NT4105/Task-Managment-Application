@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package controller.auth;
 
 import dao.UserDAO;
@@ -10,6 +5,7 @@ import model.User;
 import utils.Validation;
 import java.io.IOException;
 import java.sql.Date;
+import java.sql.Timestamp;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -17,95 +13,97 @@ import javax.servlet.http.HttpServletResponse;
 import model.enums.UserRole;
 import dto.UserDTO;
 import java.util.UUID;
+import javax.servlet.annotation.WebServlet;
 import utils.Util;
 
-/**
- *
- * @author Dell Latitude 7490
- */
+@WebServlet("/auth/sign-up")
 public class SignUpController extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String firstName = req.getParameter("firstName");
-        String lastName = req.getParameter("lastName");
-        String userName = req.getParameter("userName");
-        String dob = req.getParameter("dob");
-        String phone = req.getParameter("phone");
-        String email = req.getParameter("email");
-        String password = req.getParameter("password");
-        String role = req.getParameter("role");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        try {
+            // Get parameters
+            String userName = request.getParameter("userName");
+            String password = request.getParameter("password");
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            String role = request.getParameter("role");
+            String dobStr = request.getParameter("dob");
 
-        // Validate inputs
-        if (!Validation.isValidRole(role)) {
-            req.setAttribute("error", "Role must be either 'Manager' or 'Member'");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
+            // Validate all inputs
+            if (userName == null || userName.trim().isEmpty() ||
+                    password == null || password.trim().isEmpty() ||
+                    firstName == null || firstName.trim().isEmpty() ||
+                    lastName == null || lastName.trim().isEmpty() ||
+                    email == null || email.trim().isEmpty() ||
+                    phone == null || phone.trim().isEmpty() ||
+                    role == null || role.trim().isEmpty() ||
+                    dobStr == null || dobStr.trim().isEmpty()) {
 
-        if (!Validation.isValidEmail(email)) {
-            req.setAttribute("error", "Invalid email format");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
+                request.setAttribute("error", "All fields are required");
+                request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
+                return;
+            }
 
-        if (!Validation.isValidUsername(userName)) {
-            req.setAttribute("error", "Username must be at least 6 characters");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
+            // Validate username format
+            if (!Validation.isValidUsername(userName.trim())) {
+                request.setAttribute("error",
+                        "Invalid username format. Username must be 4-20 characters and contain only letters, numbers, and underscore");
+                request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
+                return;
+            }
 
-        if (!Validation.isValidDate(dob)) {
-            req.setAttribute("error", "Invalid date format");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
+            // Validate password
+            if (!Validation.isValidPassword(password)) {
+                request.setAttribute("error",
+                        "Password must be at least 8 characters and contain at least one number, one uppercase letter, and one special character");
+                request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
+                return;
+            }
 
-        // Create UserDTO object
-        UserDTO userDTO = new UserDTO(
-                UUID.randomUUID().toString(),
-                userName,
-                firstName,
-                lastName,
-                email,
-                phone,
-                UserRole.valueOf(role.toUpperCase()),
-                Date.valueOf(dob),
-                new Date(System.currentTimeMillis()),
-                new Date(System.currentTimeMillis()));
+            // Validate email
+            if (!Validation.isValidEmail(email.trim())) {
+                request.setAttribute("error", "Invalid email format");
+                request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
+                return;
+            }
 
-        // Check for duplicates
-        if (!UserDAO.getInstance().checkDuplicateUsername(userName)) {
-            req.setAttribute("error", "Username already exists");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
+            // Create UserDTO object
+            UserDTO userDTO = new UserDTO(
+                    UUID.randomUUID().toString(),
+                    userName.trim(),
+                    password, // Password will be hashed in DAO layer
+                    firstName.trim(),
+                    lastName.trim(),
+                    email.trim(),
+                    phone.trim(),
+                    UserRole.fromString(role),
+                    Date.valueOf(dobStr),
+                    new Timestamp(System.currentTimeMillis()),
+                    new Timestamp(System.currentTimeMillis()));
 
-        if (!UserDAO.getInstance().checkDuplicateEmail(email)) {
-            req.setAttribute("error", "Email already exists");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
+            // Try to create user
+            if (UserDAO.getInstance().insert(userDTO) > 0) {
+                // Set success message in session
+                request.getSession().setAttribute("success", "Registration successful! Please login.");
+                response.sendRedirect(request.getContextPath() + "/auth/login");
+            } else {
+                request.setAttribute("error", "Failed to create account. Please try again.");
+                request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
+            }
 
-        if (!UserDAO.getInstance().checkDuplicatePhone(phone)) {
-            req.setAttribute("error", "Phone number already exists");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
-            return;
-        }
-
-        // Insert user
-        int result = UserDAO.getInstance().insert(userDTO);
-        if (result > 0) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-        } else {
-            req.setAttribute("error", "Registration failed");
-            req.getRequestDispatcher("/static/auth/signup.jsp").forward(req, resp);
+        } catch (Exception e) {
+            request.setAttribute("error", "An error occurred during registration");
+            request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
         }
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.getRequestDispatcher("signup.jsp").forward(req, resp);
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/static/auth/signup.jsp").forward(request, response);
     }
-
 }
