@@ -17,4 +17,11 @@
     <welcome-file-list>
         <welcome-file>static/auth/login.jsp</welcome-file>
     </welcome-file-list>
+
+    <jsp-config>
+        <taglib>
+            <taglib-uri>http://your.domain.com/security</taglib-uri>
+            <taglib-location>/WEB-INF/tlds/security-functions.tld</taglib-location>
+        </taglib>
+    </jsp-config>
 </web-app>
