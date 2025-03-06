@@ -17,7 +17,7 @@ public class Project {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private List<ProjectMember> projectMembers;
-    private String encodedId;
+    private String encodedProjectId;
     // Constructor
 
     public Project() {
@@ -26,7 +26,7 @@ public class Project {
     public Project(String projectID, String projectName, String description, List<Task> tasks, Date startDate,
             Date endDate, String managerId, int totalTasks, int completedTasks, Timestamp createdAt,
             Timestamp updatedAt,
-            String encodedId) {
+            String encodedProjectId) {
         this.projectID = projectID;
         this.projectName = projectName;
         this.description = description;
@@ -38,7 +38,7 @@ public class Project {
         this.completedTasks = completedTasks;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.encodedId = encodedId;
+        this.encodedProjectId = encodedProjectId;
     }
 
     public String getProjectID() {
@@ -129,12 +129,12 @@ public class Project {
         this.updatedAt = updatedAt;
     }
 
-    public String getEncodedId() {
-        return encodedId;
+    public String getEncodedProjectId() {
+        return encodedProjectId;
     }
 
-    public void setEncodedId(String encodedId) {
-        this.encodedId = encodedId;
+    public void setEncodedProjectId(String encodedProjectId) {
+        this.encodedProjectId = encodedProjectId;
     }
 
     public List<ProjectMember> getProjectMembers() {
@@ -171,7 +171,7 @@ public class Project {
         return "Project{" + "projectID=" + projectID + ", projectName=" + projectName + ", description=" + description
                 + ", tasks=" + tasks + ", startDate=" + startDate + ", endDate=" + endDate + ", managerId=" + managerId
                 + ", totalTasks=" + totalTasks + ", completedTasks=" + completedTasks + ", createdAt=" + createdAt
-                + ", updatedAt=" + updatedAt + ", encodedId=" + encodedId + '}';
+                + ", updatedAt=" + updatedAt + ", encodedProjectId=" + encodedProjectId + '}';
     }
 
 }

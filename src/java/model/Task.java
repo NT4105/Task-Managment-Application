@@ -19,7 +19,8 @@ public class Task {
     private Timestamp createdAt;
     private Timestamp updatedAt;
     private List<TaskAssignment> assignments; // Add this field to track assignments
-    private String encodedId;
+    private String encodedTaskId;
+    private String projectName;
 
     // Constructor
     public Task() {
@@ -28,7 +29,7 @@ public class Task {
 
     public Task(String taskID, String projectID, String taskName, String description, TaskStatus status, Date dueDate,
             List<String> assignedUsers, String submissionLink, String submissionFilePath, Timestamp createdAt,
-            Timestamp updatedAt) {
+            Timestamp updatedAt, String projectName) {
         this.taskID = taskID;
         this.projectID = projectID;
         this.taskName = taskName;
@@ -40,6 +41,7 @@ public class Task {
         this.submissionFilePath = submissionFilePath;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.projectName = projectName;
     }
 
     // Getter & Setter
@@ -131,12 +133,20 @@ public class Task {
         this.updatedAt = updatedAt;
     }
 
-    public String getEncodedId() {
-        return encodedId;
+    public String getEncodedTaskId() {
+        return encodedTaskId;
     }
 
-    public void setEncodedId(String encodedId) {
-        this.encodedId = encodedId;
+    public void setEncodedTaskId(String encodedTaskId) {
+        this.encodedTaskId = encodedTaskId;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
     }
 
     @Override
@@ -146,7 +156,7 @@ public class Task {
                 + status + ", dueDate=" + dueDate + ", assignedUsers=" + assignedUsers + ", submissionLink="
                 + submissionLink
                 + ", submissionFilePath=" + submissionFilePath + ", createdAt=" + createdAt
-                + ", updatedAt=" + updatedAt + '}';
+                + ", updatedAt=" + updatedAt + ", projectName=" + projectName + '}';
     }
 
     // Add these methods to check if the task is due soon or overdue
