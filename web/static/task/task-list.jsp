@@ -130,7 +130,7 @@
                     fetch('${pageContext.request.contextPath}/task/delete', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Content-Type': 'application/x-www-form-urlencoded'
                         },
                         body: 'taskID=' + taskID
                     })

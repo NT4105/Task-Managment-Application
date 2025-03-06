@@ -1,218 +1,284 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%> <%@ taglib prefix="c"
+uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Task Details</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                margin: 0;
-                padding: 20px;
-                background-color: #f0f2f5;
-            }
-            
-            .container {
-                max-width: 800px;
-                margin: 0 auto;
-                background-color: white;
-                padding: 20px;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            }
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Task Details</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f0f2f5;
+        color: #1c1e21;
+      }
 
-            .task-info {
-                margin-bottom: 20px;
-                padding: 15px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
+      .container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
 
-            .status-badge {
-                display: inline-block;
-                padding: 5px 10px;
-                border-radius: 15px;
-                font-size: 14px;
-                font-weight: bold;
-            }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e4e6eb;
+      }
 
-            .status-pending { background-color: #ffeeba; }
-            .status-in-progress { background-color: #b8daff; }
-            .status-completed { background-color: #c3e6cb; }
+      .task-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
 
-            .due-soon { color: #856404; }
-            .overdue { color: #721c24; }
+      .task-title {
+        font-size: 24px;
+        color: #1877f2;
+        margin: 0;
+      }
 
-            .btn {
-                display: inline-block;
-                padding: 8px 16px;
-                margin: 5px;
-                border: none;
-                border-radius: 4px;
-                background-color: #007bff;
-                color: white;
-                text-decoration: none;
-                cursor: pointer;
-            }
+      .task-info {
+        background: #f7f8fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+      }
 
-            .btn-danger {
-                background-color: #dc3545;
-            }
+      .info-row {
+        display: flex;
+        margin-bottom: 15px;
+      }
 
-            .submission-section {
-                margin-top: 20px;
-                padding: 15px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
+      .info-label {
+        width: 120px;
+        font-weight: bold;
+        color: #65676b;
+      }
 
-            .form-group {
-                margin-bottom: 15px;
-            }
+      .info-value {
+        flex: 1;
+      }
 
-            .form-group label {
-                display: block;
-                margin-bottom: 5px;
-            }
+      .description {
+        background: #f7f8fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        white-space: pre-line;
+      }
 
-            .form-group input {
-                width: 100%;
-                padding: 8px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-            }
+      .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.3s;
+      }
 
-            .button-group {
-                margin-top: 20px;
-                text-align: right;
-            }
+      .btn-primary {
+        background: #1877f2;
+        color: white;
+      }
 
-            .back-btn {
-                display: inline-block;
-                padding: 8px 16px;
-                background-color: #f0f0f0;
-                color: #333;
-                text-decoration: none;
-                border-radius: 4px;
-                margin-left: 10px;
-            }
+      .btn-primary:hover {
+        background: #166fe5;
+      }
 
-            .back-btn:hover {
-                background-color: #e0e0e0;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>${task.taskName}</h1>
-            
-            <div class="task-info">
-                <p><strong>Project:</strong> ${task.projectName}</p>
-                <p><strong>Description:</strong> ${task.description}</p>
-                <p>
-                    <strong>Status:</strong> 
-                    <span class="status-badge status-${task.status.toLowerCase()}">${task.status}</span>
-                </p>
-                <p>
-                    <strong>Due Date:</strong> 
-                    <span class="${task.isDueSoon() ? 'due-soon' : ''} ${task.isOverdue() ? 'overdue' : ''}">
-                        ${task.dueDate}
-                        <c:if test="${task.isDueSoon()}"> (Due Soon)</c:if>
-                        <c:if test="${task.isOverdue()}"> (Overdue)</c:if>
-                    </span>
-                </p>
-            </div>
+      .btn-secondary {
+        background: #e4e6eb;
+        color: #050505;
+      }
 
-            <div class="assigned-members">
-                <h3>Assigned Team Members</h3>
-                <ul>
-                    <c:forEach var="user" items="${task.assignedUsers}">
-                        <li>${user}</li>
-                    </c:forEach>
-                </ul>
-            </div>
+      .btn-secondary:hover {
+        background: #d8dadf;
+      }
 
-            <%-- Hiển thị các nút chức năng dựa trên vai trò --%>
-            <c:choose>
-                <c:when test="${sessionScope.userRole == 'MANAGER'}">
-                    <%-- Chức năng cho Project Manager --%>
-                    <div>
-                        <a href="update-task?id=${task.taskID}" class="btn">Edit Task</a>
-                        <form action="delete-task" method="POST" style="display: inline;">
-                            <input type="hidden" name="taskId" value="${task.taskID}">
-                            <button type="submit" class="btn btn-danger" 
-                                    onclick="return confirm('Are you sure you want to delete this task?')">
-                                Delete Task
-                            </button>
-                        </form>
-                    </div>
-                </c:when>
-                <c:when test="${sessionScope.userRole == 'MEMBER' && task.isAssignedToCurrentUser}">
-                    <%-- Chức năng cho Team Member được assign --%>
-                    <div class="submission-section">
-                        <h3>Task Submission</h3>
-                        <c:if test="${task.status != 'COMPLETED'}">
-                            <form action="submit-task" method="POST" enctype="multipart/form-data">
-                                <input type="hidden" name="taskId" value="${task.taskID}">
-                                
-                                <div class="form-group">
-                                    <label for="submissionLink">Submission Link:</label>
-                                    <input type="url" id="submissionLink" name="submissionLink" 
-                                           value="${task.submissionLink}">
-                                </div>
-                                
-                                <div class="form-group">
-                                    <label for="submissionFile">Upload File:</label>
-                                    <input type="file" id="submissionFile" name="submissionFile">
-                                </div>
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 30px;
+      }
 
-                                <div class="form-group">
-                                    <label for="status">Update Status:</label>
-                                    <select id="status" name="status">
-                                        <option value="IN_PROGRESS" ${task.status == 'IN_PROGRESS' ? 'selected' : ''}>
-                                            In Progress
-                                        </option>
-                                        <option value="COMPLETED" ${task.status == 'COMPLETED' ? 'selected' : ''}>
-                                            Completed
-                                        </option>
-                                    </select>
-                                </div>
+      .left-actions {
+        display: flex;
+        gap: 10px;
+      }
 
-                                <button type="submit" class="btn">Submit Task</button>
-                            </form>
-                        </c:if>
-                        
-                        <c:if test="${task.status == 'COMPLETED'}">
-                            <p><strong>Submission Link:</strong> <a href="${task.submissionLink}" target="_blank">${task.submissionLink}</a></p>
-                            <c:if test="${not empty task.submissionFilePath}">
-                                <p><strong>Submitted File:</strong> <a href="download?taskId=${task.taskID}">Download</a></p>
-                            </c:if>
-                        </c:if>
-                    </div>
-                </c:when>
-            </c:choose>
+      .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+      }
 
-            <div class="task-assignments">
-                <h3>Current Assignments</h3>
-                <c:forEach var="assignment" items="${task.assignments}">
-                    <div class="assignment">
-                        <span>${assignment.fullName} (${assignment.username})</span>
-                        <span>Joined: ${assignment.assignedAt}</span>
-                    </div>
-                </c:forEach>
-                
-                <c:if test="${sessionScope.userRole == 'MEMBER'}">
-                    <form action="${pageContext.request.contextPath}/task/accept" method="POST">
-                        <input type="hidden" name="taskId" value="${task.taskID}" />
-                        <button type="submit" class="btn">Accept Task</button>
-                    </form>
-                </c:if>
-            </div>
+      .status-PENDING {
+        background: #fff3cd;
+        color: #856404;
+      }
 
-            <div class="button-group">
-                <a href="${pageContext.request.contextPath}/project/details?id=${task.projectID}" class="back-btn">Back to Project</a>
-            </div>
+      .status-COMPLETED {
+        background: #d4edda;
+        color: #155724;
+      }
+
+      .status-IN_PROGRESS {
+        background: #cce5ff;
+        color: #004085;
+      }
+
+      h3 {
+        margin-top: 30px;
+        color: #1c1e21;
+      }
+
+      .btn-danger {
+        background: #dc3545;
+        color: white;
+        margin-left: 10px;
+      }
+
+      .btn-danger:hover {
+        background: #c82333;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        text-align: center;
+      }
+
+      .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="task-header">
+          <span class="status-badge status-${task.status}">${task.status}</span>
+          <h1 class="task-title">${task.taskName}</h1>
         </div>
-    </body>
-</html> 
+        <a
+          href="${pageContext.request.contextPath}/project/view?id=${project.encodedProjectId}"
+          class="btn btn-secondary"
+          >Back to Project</a
+        >
+      </div>
+
+      <div class="task-info">
+        <div class="info-row">
+          <div class="info-label">Project:</div>
+          <div class="info-value">${task.projectName}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Due Date:</div>
+          <div class="info-value">${task.dueDate}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Created:</div>
+          <div class="info-value">${task.createdAt}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Last Updated:</div>
+          <div class="info-value">${task.updatedAt}</div>
+        </div>
+      </div>
+
+      <h3>Description</h3>
+      <div class="description">${task.description}</div>
+
+      <c:if test="${sessionScope.userRole == 'MANAGER'}">
+        <div class="left-actions">
+          <a
+            href="${pageContext.request.contextPath}/task/update?id=${task.encodedTaskId}"
+            class="btn btn-primary"
+            >Edit Task</a
+          >
+          <button onclick="showDeleteModal()" class="btn btn-danger">
+            Delete Task
+          </button>
+        </div>
+      </c:if>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h3>Delete Task</h3>
+        <p>Are you sure you want to delete this task?</p>
+        <div class="modal-buttons">
+          <button class="btn btn-secondary" onclick="closeDeleteModal()">
+            Cancel
+          </button>
+          <button class="btn btn-danger" onclick="confirmDelete()">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showDeleteModal() {
+        document.getElementById("deleteModal").style.display = "block";
+      }
+
+      function closeDeleteModal() {
+        document.getElementById("deleteModal").style.display = "none";
+      }
+
+      function confirmDelete() {
+        // Tạo form để submit
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "${pageContext.request.contextPath}/task/delete";
+
+        // Thêm taskId
+        const taskIdInput = document.createElement("input");
+        taskIdInput.type = "hidden";
+        taskIdInput.name = "taskId";
+        taskIdInput.value = "${task.encodedTaskId}";
+        form.appendChild(taskIdInput);
+
+        // Add encoded project ID for redirect
+        const projectIdInput = document.createElement("input");
+        projectIdInput.type = "hidden";
+        projectIdInput.name = "projectId";
+        projectIdInput.value = "${project.encodedProjectId}";
+        form.appendChild(projectIdInput);
+
+        document.body.appendChild(form);
+        form.submit();
+      }
+    </script>
+  </body>
+</html>
