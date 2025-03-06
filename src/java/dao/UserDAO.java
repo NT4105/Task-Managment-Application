@@ -7,6 +7,8 @@ import utils.JDBCUtil;
 import utils.Util;
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,6 +20,7 @@ import java.util.logging.Logger;
 
 public class UserDAO {
     private static UserDAO instance;
+    private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
 
     public static UserDAO getInstance() {
         if (instance == null) {
@@ -39,8 +42,8 @@ public class UserDAO {
                 userPs.setString(2, userDTO.getUserName());
                 userPs.setString(3, Util.encryptPassword(userDTO.getPassword()));
                 userPs.setString(4, userDTO.getRole().name());
-                userPs.setDate(5, userDTO.getCreatedAt());
-                userPs.setDate(6, userDTO.getUpdatedAt());
+                userPs.setTimestamp(5, userDTO.getCreatedAt());
+                userPs.setTimestamp(6, userDTO.getUpdatedAt());
                 userPs.executeUpdate();
             }
 
@@ -53,8 +56,8 @@ public class UserDAO {
                 profilePs.setString(4, userDTO.getEmail());
                 profilePs.setString(5, userDTO.getPhone());
                 profilePs.setDate(6, userDTO.getDob());
-                profilePs.setDate(7, userDTO.getCreatedAt());
-                profilePs.setDate(8, userDTO.getUpdatedAt());
+                profilePs.setTimestamp(7, userDTO.getCreatedAt());
+                profilePs.setTimestamp(8, userDTO.getUpdatedAt());
                 profilePs.executeUpdate();
             }
 
@@ -99,8 +102,8 @@ public class UserDAO {
                     user.setUserName(rs.getString("Username"));
                     user.setPassword(rs.getString("Password"));
                     user.setRole(UserRole.fromString(rs.getString("Role")));
-                    user.setCreatedAt(rs.getDate("CreatedAt"));
-                    user.setUpdatedAt(rs.getDate("UpdatedAt"));
+                    user.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    user.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                     user.setFirstName(rs.getString("FirstName"));
                     user.setLastName(rs.getString("LastName"));
                     user.setEmail(rs.getString("Email"));
@@ -134,7 +137,7 @@ public class UserDAO {
 
             try (PreparedStatement userPs = con.prepareStatement(userSql)) {
                 int paramIndex = 1;
-                userPs.setDate(paramIndex++, new Date(System.currentTimeMillis()));
+                userPs.setTimestamp(paramIndex++, Timestamp.valueOf(LocalDateTime.now()));
                 if (upPassword) {
                     userPs.setString(paramIndex++, Util.encryptPassword(user.getPassword()));
                 }
@@ -153,7 +156,7 @@ public class UserDAO {
                 profilePs.setDate(3, user.getDob());
                 profilePs.setString(4, user.getPhone());
                 profilePs.setString(5, user.getEmail());
-                profilePs.setDate(6, new Date(System.currentTimeMillis()));
+                profilePs.setTimestamp(6, Timestamp.valueOf(LocalDateTime.now()));
                 profilePs.setString(7, user.getUserID());
                 profilePs.executeUpdate();
             }
@@ -185,60 +188,35 @@ public class UserDAO {
     public User login(String userName, String password) {
         String sql = "SELECT u.*, p.FirstName, p.LastName, p.Email, p.Phone, p.DateOfBirth " +
                 "FROM Users u " +
-                "JOIN Profiles p ON u.UserID = p.UserID " +
+                "JOIN Profiles p ON u.UserId = p.UserId " +
                 "WHERE u.Username = ?";
+
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
-            Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
-                    "Attempting login for username: {0}", userName);
-
             ps.setString(1, userName);
-            ResultSet rs = ps.executeQuery();
-
-            if (rs.next()) {
-                String hashedPassword = rs.getString("Password");
-                Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
-                        "Found user, comparing passwords. Stored hash: {0}", hashedPassword);
-
-                // Verify plain password với hashedPassword từ DB
-                boolean passwordMatch = Util.verifyPassword(password, hashedPassword);
-                Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
-                        "Password verification result: {0}", passwordMatch);
-
-                if (passwordMatch) {
-                    User user = new User();
-                    user.setUserID(rs.getString("UserID"));
-                    user.setUserName(userName);
-                    user.setPassword(hashedPassword);
-                    user.setRole(UserRole.valueOf(rs.getString("Role")));
-                    user.setFirstName(rs.getString("FirstName"));
-                    user.setLastName(rs.getString("LastName"));
-                    user.setEmail(rs.getString("Email"));
-                    user.setPhone(rs.getString("Phone"));
-                    user.setDob(rs.getDate("DateOfBirth"));
-                    return user;
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String hashedPassword = rs.getString("Password");
+                    if (Util.verifyPassword(password, hashedPassword)) {
+                        User user = new User();
+                        user.setUserID(rs.getString("UserId"));
+                        user.setUserName(rs.getString("Username"));
+                        user.setPassword(hashedPassword);
+                        user.setRole(UserRole.fromString(rs.getString("Role")));
+                        user.setFirstName(rs.getString("FirstName"));
+                        user.setLastName(rs.getString("LastName"));
+                        user.setEmail(rs.getString("Email"));
+                        user.setPhone(rs.getString("Phone"));
+                        user.setDob(rs.getDate("DateOfBirth"));
+                        return user;
+                    }
                 }
-            } else {
-                Logger.getLogger(UserDAO.class.getName()).log(Level.INFO,
-                        "No user found with username: {0}", userName);
             }
         } catch (SQLException e) {
-            Logger.getLogger(UserDAO.class.getName()).log(Level.SEVERE,
-                    "Database error during login", e);
+            e.printStackTrace();
         }
         return null;
-    }
-
-    public User checkAccessToHome(String id) {
-        User res = null;
-        ArrayList<User> check = selectAll();
-        for (User user : check) {
-            if (Util.encryptPassword(user.getUserID()).equals(id)) {
-                res = user;
-            }
-        }
-        return res;
     }
 
     public boolean checkDuplicateEmail(String email) {
@@ -309,37 +287,6 @@ public class UserDAO {
         }
     }
 
-    public ArrayList<User> selectAll() {
-        ArrayList<User> users = new ArrayList<>();
-        String sql = "SELECT u.*, p.FirstName, p.LastName, p.Email, p.Phone, p.DateOfBirth " +
-                "FROM Users u " +
-                "JOIN Profiles p ON u.UserId = p.UserId";
-
-        try (Connection con = JDBCUtil.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
-
-            while (rs.next()) {
-                User user = new User();
-                user.setUserID(rs.getString("UserId"));
-                user.setUserName(rs.getString("Username"));
-                user.setPassword(rs.getString("Password"));
-                user.setRole(UserRole.fromString(rs.getString("Role")));
-                user.setCreatedAt(rs.getDate("CreatedAt"));
-                user.setUpdatedAt(rs.getDate("UpdatedAt"));
-                user.setFirstName(rs.getString("FirstName"));
-                user.setLastName(rs.getString("LastName"));
-                user.setEmail(rs.getString("Email"));
-                user.setPhone(rs.getString("Phone"));
-                user.setDob(rs.getDate("DateOfBirth"));
-                users.add(user);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return users;
-    }
-
     public User getUserByEmail(String email) {
         String sql = "SELECT * FROM Users u JOIN Profiles p ON u.UserID = p.UserID WHERE p.Email = ?";
         try (Connection con = JDBCUtil.getConnection();
@@ -361,13 +308,24 @@ public class UserDAO {
     }
 
     public boolean resetPassword(String email, String newPassword) {
-        String sql = "UPDATE Users SET Password = ? WHERE Email = ?";
+        String sql = "UPDATE Users " +
+                "SET Password = ? " +
+                "WHERE UserID = (SELECT UserID FROM Profiles WHERE Email = ?)";
+
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, Util.encryptPassword(newPassword));
+            String hashedPassword = Util.encryptPassword(newPassword);
+            System.out.println("Debug - Hashed password: " + hashedPassword); // Debug log
+            System.out.println("Debug - Email being used: " + email); // Debug log
+
+            ps.setString(1, hashedPassword);
             ps.setString(2, email);
-            return ps.executeUpdate() > 0;
+
+            int rowsAffected = ps.executeUpdate();
+            System.out.println("Debug - Rows affected: " + rowsAffected); // Debug log
+            return rowsAffected > 0;
         } catch (SQLException e) {
+            System.out.println("Debug - SQL Error: " + e.getMessage()); // Debug log
             e.printStackTrace();
             return false;
         }
@@ -384,8 +342,30 @@ public class UserDAO {
         user.setEmail(rs.getString("Email"));
         user.setPhone(rs.getString("Phone"));
         user.setDob(rs.getDate("DateOfBirth"));
-        user.setCreatedAt(rs.getDate("CreatedAt"));
-        user.setUpdatedAt(rs.getDate("UpdatedAt"));
+        user.setCreatedAt(rs.getTimestamp("CreatedAt"));
+        user.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
         return user;
+    }
+
+    public List<User> getAllMembers() {
+        List<User> members = new ArrayList<>();
+        String sql = "SELECT u.*, p.FirstName, p.LastName FROM Users u " +
+                "JOIN Profiles p ON u.UserID = p.UserID " +
+                "WHERE u.Role = 'MEMBER'";
+
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setUserID(rs.getString("UserID"));
+                user.setFirstName(rs.getString("FirstName"));
+                user.setLastName(rs.getString("LastName"));
+                members.add(user);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error getting members", e);
+        }
+        return members;
     }
 }

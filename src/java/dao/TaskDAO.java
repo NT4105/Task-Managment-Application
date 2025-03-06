@@ -10,9 +10,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import utils.SecurityUtil;
+import java.sql.Timestamp;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TaskDAO {
     private static TaskDAO instance;
+    private static final Logger LOGGER = Logger.getLogger(TaskDAO.class.getName());
 
     public static TaskDAO getInstance() {
         if (instance == null) {
@@ -36,8 +41,8 @@ public class TaskDAO {
             ps.setString(4, task.getDescription());
             ps.setString(5, TaskStatus.PENDING.toString());
             ps.setDate(6, task.getDueDate());
-            ps.setDate(7, task.getCreatedAt());
-            ps.setDate(8, task.getUpdatedAt());
+            ps.setTimestamp(7, new Timestamp(task.getCreatedAt().getTime()));
+            ps.setTimestamp(8, new Timestamp(task.getUpdatedAt().getTime()));
 
             result = ps.executeUpdate();
 
@@ -61,7 +66,7 @@ public class TaskDAO {
 
     public int update(Task task) {
         int result = 0;
-        String sql = "UPDATE Tasks SET TaskName = ?, Description = ?, DueDate = ?, UpdatedAt = ? WHERE TaskId = ?";
+        String sql = "UPDATE Tasks SET TaskName = ?, Description = ?, DueDate = ?, UpdatedAt = ? WHERE TaskID = ?";
 
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
@@ -69,7 +74,7 @@ public class TaskDAO {
             ps.setString(1, task.getTaskName());
             ps.setString(2, task.getDescription());
             ps.setDate(3, task.getDueDate());
-            ps.setDate(4, task.getUpdatedAt());
+            ps.setTimestamp(4, new Timestamp(task.getUpdatedAt().getTime()));
             ps.setString(5, task.getTaskID());
 
             result = ps.executeUpdate();
@@ -110,6 +115,7 @@ public class TaskDAO {
 
             ps.setString(1, taskId);
             ps.setString(2, userId);
+            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
 
             // Update task status to IN_PROGRESS
             if (ps.executeUpdate() > 0) {
@@ -266,26 +272,62 @@ public class TaskDAO {
         task.setDescription(rs.getString("Description")); // Lấy Description từ cột "Description"
         task.setStatus(TaskStatus.valueOf(rs.getString("Status"))); // Chuyển đổi Status thành enum
         task.setDueDate(rs.getDate("DueDate")); // Lấy DueDate từ cột "DueDate"
-        task.setCreatedAt(rs.getDate("CreatedAt")); // Lấy CreatedAt từ cột "CreatedAt"
-        task.setUpdatedAt(rs.getDate("UpdatedAt")); // Lấy UpdatedAt từ cột "UpdatedAt"
+        task.setCreatedAt(rs.getTimestamp("CreatedAt")); // Lấy CreatedAt từ cột "CreatedAt"
+        task.setUpdatedAt(rs.getTimestamp("UpdatedAt")); // Lấy UpdatedAt từ cột "UpdatedAt"
         return task;
     }
 
-    public boolean deleteTask(String taskID) {
-        String sql = "DELETE FROM Tasks WHERE TaskID = ?";
-        try (Connection con = JDBCUtil.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, taskID);
-            return ps.executeUpdate() > 0;
+    public boolean deleteTask(String taskId) {
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try {
+            con = JDBCUtil.getConnection();
+            con.setAutoCommit(false);
+
+            // First delete the task ID mapping
+            String deleteMappingSQL = "DELETE FROM TaskIdMapping WHERE TaskID = ?";
+            ps = con.prepareStatement(deleteMappingSQL);
+            ps.setString(1, taskId);
+            ps.executeUpdate();
+
+            // Then delete the task
+            String deleteTaskSQL = "DELETE FROM Tasks WHERE TaskID = ?";
+            ps = con.prepareStatement(deleteTaskSQL);
+            ps.setString(1, taskId);
+            int result = ps.executeUpdate();
+
+            con.commit();
+            return result > 0;
+
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Error rolling back transaction", ex);
+                }
+            }
+            LOGGER.log(Level.SEVERE, "Error deleting task", e);
+            return false;
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Error closing connection", e);
+                }
+            }
         }
-        return false;
     }
 
     // Dùng để lấy task từ taskID, kiểm tra xem task có tồn tại không
     public Task selectById(String taskId) {
-        String sql = "SELECT * FROM Tasks WHERE TaskID = ?";
+        String sql = "SELECT t.*, p.ProjectName " +
+                "FROM Tasks t " +
+                "JOIN Projects p ON t.ProjectID = p.ProjectID " +
+                "WHERE t.TaskID = ?";
+
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, taskId);
@@ -298,10 +340,35 @@ public class TaskDAO {
                     task.setDescription(rs.getString("Description"));
                     task.setStatus(TaskStatus.valueOf(rs.getString("Status")));
                     task.setDueDate(rs.getDate("DueDate"));
-                    task.setCreatedAt(rs.getDate("CreatedAt"));
-                    task.setUpdatedAt(rs.getDate("UpdatedAt"));
+                    task.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    task.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+                    task.setProjectName(rs.getString("ProjectName"));
+
+                    // Set encoded task ID
+                    String encodedId = getEncodedTaskId(task.getTaskID());
+                    if (encodedId == null) {
+                        encodedId = SecurityUtil.encodeTaskId(task.getTaskID());
+                        saveIdTaskMapping(task.getTaskID(), encodedId);
+                    }
+                    task.setEncodedTaskId(encodedId);
+
                     return task;
                 }
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error selecting task by ID", e);
+        }
+        return null;
+    }
+
+    public String getEncodedTaskId(String taskId) {
+        String sql = "SELECT EncodedTaskID FROM TaskIdMapping WHERE TaskID = ?";
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, taskId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("EncodedTaskID");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -309,5 +376,64 @@ public class TaskDAO {
         return null;
     }
 
-    // Add other necessary methods like update, delete, select, etc.
+    public String getOriginalTaskId(String encodedTaskId) {
+        String sql = "SELECT TaskID FROM TaskIdMapping WHERE EncodedTaskID = ?";
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, encodedTaskId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getString("TaskID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean saveIdTaskMapping(String taskId, String encodedTaskId) {
+        String sql = "INSERT INTO TaskIdMapping (TaskID, EncodedTaskID) VALUES (?, ?)";
+
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, taskId);
+            ps.setString(2, encodedTaskId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public List<Task> getTasksByProject(String projectId) {
+        List<Task> tasks = new ArrayList<>();
+        String sql = "SELECT * FROM Tasks WHERE ProjectID = ?";
+
+        try (Connection con = JDBCUtil.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, projectId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Task task = new Task();
+                task.setTaskID(rs.getString("TaskID"));
+                task.setProjectID(rs.getString("ProjectID"));
+                task.setTaskName(rs.getString("TaskName"));
+                task.setDescription(rs.getString("Description"));
+                task.setStatus(TaskStatus.valueOf(rs.getString("Status")));
+                task.setDueDate(rs.getDate("DueDate"));
+                task.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                task.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
+
+                // Set encoded ID
+                task.setEncodedTaskId(SecurityUtil.encodeTaskId(task.getTaskID()));
+
+                tasks.add(task);
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error loading tasks", e);
+        }
+        return tasks;
+    }
 }
