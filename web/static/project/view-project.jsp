@@ -239,6 +239,44 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
         background-color: #d1fae5;
         color: #065f46;
       }
+
+      .team-members-section {
+        margin-top: 30px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .team-members-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .member-card {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        border: 1px solid #e9ecef;
+      }
+
+      .member-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .member-name {
+        font-weight: 500;
+        color: #2c3e50;
+      }
+
+      .member-joined {
+        font-size: 0.85em;
+        color: #6c757d;
+      }
     </style>
   </head>
   <body>
@@ -296,6 +334,22 @@ uri="http://java.sun.com/jsp/jstl/functions" %>
               project.totalTasks))}% Complete</span
             >
           </div>
+        </div>
+      </div>
+
+      <div class="team-members-section">
+        <h3>Team Members</h3>
+        <div class="team-members-list">
+          <c:forEach items="${project.projectMembers}" var="member">
+            <div class="member-card">
+              <div class="member-info">
+                <span class="member-name"
+                  >${member.firstName} ${member.lastName}</span
+                >
+                <span class="member-joined">Joined: ${member.joinedAt}</span>
+              </div>
+            </div>
+          </c:forEach>
         </div>
       </div>
 

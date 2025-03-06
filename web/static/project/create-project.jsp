@@ -58,41 +58,90 @@
 
             .member-selection {
                 border: 1px solid #ddd;
-                padding: 15px;
-                border-radius: 4px;
-                max-height: 300px;
+                border-radius: 6px;
+                padding: 20px;
+                margin-bottom: 24px;
             }
 
             .search-box {
-                margin-bottom: 10px;
+                margin-bottom: 15px;
+                position: relative;
             }
 
             .search-box input {
                 width: 100%;
-                padding: 8px;
+                padding: 12px;
+                padding-left: 35px;
                 border: 1px solid #ddd;
-                border-radius: 4px;
+                border-radius: 6px;
+                font-size: 14px;
             }
 
-            #memberList {
-                max-height: 200px;
+            .search-box i {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #666;
+            }
+
+            .member-list {
+                max-height: 300px;
                 overflow-y: auto;
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 10px;
+                margin-top: 10px;
             }
 
             .member-item {
                 display: flex;
                 align-items: center;
-                padding: 5px 0;
+                gap: 8px;
+                padding: 12px;
+                border: 1px solid #eee;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+            }
+
+            .member-item:hover {
+                background-color: #f8f9fa;
             }
 
             .member-item input[type="checkbox"] {
-                margin-right: 10px;
+                width: 16px;
+                height: 16px;
                 cursor: pointer;
             }
 
             .member-item label {
-                cursor: pointer;
                 margin: 0;
+                cursor: pointer;
+            }
+
+            .selected-count {
+                margin-top: 10px;
+                font-size: 14px;
+                color: #666;
+            }
+
+            /* Thêm style cho scrollbar */
+            .member-list::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .member-list::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 4px;
+            }
+
+            .member-list::-webkit-scrollbar-thumb {
+                background: #ccc;
+                border-radius: 4px;
+            }
+
+            .member-list::-webkit-scrollbar-thumb:hover {
+                background: #999;
             }
 
             .button-group {
@@ -180,18 +229,29 @@
                 </div>
                 
                 <div class="member-selection">
+                    <label>Team Members</label>
                     <div class="search-box">
-                        <input type="text" id="memberSearch" onkeyup="searchMembers()" placeholder="Search members...">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="memberSearch" 
+                               onkeyup="searchMembers()" 
+                               placeholder="Search members...">
                     </div>
-                    <div id="memberList">
-                        <c:forEach var="member" items="${availableMembers}">
+                    <div class="member-list" id="memberList">
+                        <c:forEach items="${availableMembers}" var="member">
                             <div class="member-item">
-                                <input type="checkbox" name="selectedMembers" value="${member.userID}" id="member-${member.userID}">
+                                <input type="checkbox" 
+                                       id="member-${member.userID}" 
+                                       name="teamMembers" 
+                                       value="${member.userID}"
+                                       class="member-checkbox">
                                 <label for="member-${member.userID}">
                                     ${member.firstName} ${member.lastName}
                                 </label>
                             </div>
                         </c:forEach>
+                    </div>
+                    <div class="selected-count">
+                        Selected members: <span id="selectedCount">0</span>
                     </div>
                 </div>
 
@@ -231,6 +291,40 @@
             document.getElementById('startDate').addEventListener('change', function() {
                 document.getElementById('endDate').setAttribute('min', this.value);
             });
+
+            // Search functionality
+            document.getElementById('memberSearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const memberItems = document.querySelectorAll('.member-item');
+
+                memberItems.forEach(item => {
+                    const memberName = item.querySelector('label').textContent.toLowerCase();
+                    if (memberName.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Update selected count
+            const memberCheckboxes = document.querySelectorAll('.member-checkbox');
+            const selectedCountSpan = document.getElementById('selectedCount');
+
+            function updateSelectedCount() {
+                const selectedCount = document.querySelectorAll('.member-checkbox:checked').length;
+                selectedCountSpan.textContent = selectedCount;
+            }
+
+            memberCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateSelectedCount);
+            });
+
+            // Initial count
+            updateSelectedCount();
         </script>
+
+        <!-- Add Font Awesome for search icon -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     </body>
 </html> 
