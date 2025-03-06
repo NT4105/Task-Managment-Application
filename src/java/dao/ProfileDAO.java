@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 public class ProfileDAO {
     private static ProfileDAO instance;
@@ -35,8 +36,8 @@ public class ProfileDAO {
                     profile.setEmail(rs.getString("Email"));
                     profile.setPhone(rs.getString("Phone"));
                     profile.setDateOfBirth(rs.getDate("DateOfBirth"));
-                    profile.setCreatedAt(rs.getDate("CreatedAt"));
-                    profile.setUpdatedAt(rs.getDate("UpdatedAt"));
+                    profile.setCreatedAt(rs.getTimestamp("CreatedAt"));
+                    profile.setUpdatedAt(rs.getTimestamp("UpdatedAt"));
                     return profile;
                 }
             }
@@ -61,7 +62,8 @@ public class ProfileDAO {
             ps.setDate(5, profile.getDateOfBirth());
             ps.setString(6, profile.getUserId());
 
-            return ps.executeUpdate() > 0;
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -84,13 +86,14 @@ public class ProfileDAO {
         }
     }
 
-    public boolean checkDuplicateEmail(String email, String currentUserId) {
+    public boolean checkDuplicateEmail(String email, String userId) {
         String sql = "SELECT COUNT(*) FROM Profiles WHERE Email = ? AND UserId != ?";
+
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, email);
-            ps.setString(2, currentUserId);
+            ps.setString(2, userId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -103,13 +106,14 @@ public class ProfileDAO {
         return false;
     }
 
-    public boolean checkDuplicatePhone(String phone, String currentUserId) {
+    public boolean checkDuplicatePhone(String phone, String userId) {
         String sql = "SELECT COUNT(*) FROM Profiles WHERE Phone = ? AND UserId != ?";
+
         try (Connection con = JDBCUtil.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, phone);
-            ps.setString(2, currentUserId);
+            ps.setString(2, userId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

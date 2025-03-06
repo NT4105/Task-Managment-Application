@@ -12,6 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 @WebServlet("/profile")
 public class ProfileController extends HttpServlet {
@@ -21,14 +23,19 @@ public class ProfileController extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect("auth/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         String userId = (String) session.getAttribute("userId");
         User user = UserDAO.getInstance().selectById(userId);
-        request.setAttribute("user", user);
-        request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+
+        if (user != null) {
+            request.setAttribute("user", user);
+            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+        } else {
+            response.sendRedirect(request.getContextPath() + "/login");
+        }
     }
 
     @Override
@@ -36,79 +43,97 @@ public class ProfileController extends HttpServlet {
             throws ServletException, IOException {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
-            response.sendRedirect("auth/login");
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         String userId = (String) session.getAttribute("userId");
-        ProfileDAO profileDAO = ProfileDAO.getInstance();
-        Profile profile = profileDAO.getProfileByUserId(userId);
 
-        if (profile == null) {
-            response.sendRedirect("auth/login");
+        // Get current user data
+        User currentUser = UserDAO.getInstance().selectById(userId);
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
         // Get form data
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
-        String phone = request.getParameter("phone");
         String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
         String dobStr = request.getParameter("dob");
 
-        // Validate inputs
-        if (!Validation.isValidName(firstName, lastName)) {
-            request.setAttribute("error", "Invalid name format");
-            request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
-            return;
+        // Create profile object with new data
+        Profile profile = new Profile();
+        profile.setUserId(userId);
+        profile.setFirstName(firstName);
+        profile.setLastName(lastName);
+        profile.setEmail(email);
+        profile.setPhone(phone);
+
+        if (dobStr != null && !dobStr.isEmpty()) {
+            try {
+                profile.setDateOfBirth(Date.valueOf(dobStr));
+            } catch (IllegalArgumentException e) {
+                request.setAttribute("error", "Invalid date format");
+                request.setAttribute("user", currentUser);
+                request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+                return;
+            }
         }
 
-        if (!Validation.isValidPhone(phone)) {
-            request.setAttribute("error", "Invalid phone number");
-            request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
-            return;
+        // Validate changed fields
+        ProfileDAO profileDAO = ProfileDAO.getInstance();
+
+        // Only validate email if it changed
+        if (!email.equals(currentUser.getEmail())) {
+            if (!Validation.isValidEmail(email)) {
+                request.setAttribute("error", "Invalid email format");
+                request.setAttribute("user", currentUser);
+                request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+                return;
+            }
+
+            if (!profileDAO.checkDuplicateEmail(email, userId)) {
+                request.setAttribute("error", "Email already exists");
+                request.setAttribute("user", currentUser);
+                request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+                return;
+            }
         }
 
-        if (!Validation.isValidEmail(email)) {
-            request.setAttribute("error", "Invalid email format");
-            request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
-            return;
-        }
+        // Only validate phone if it changed
+        if (!phone.equals(currentUser.getPhone())) {
+            if (!Validation.isValidPhone(phone)) {
+                request.setAttribute("error", "Invalid phone number format");
+                request.setAttribute("user", currentUser);
+                request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+                return;
+            }
 
-        // Check for duplicates (excluding current user)
-        if (!profileDAO.checkDuplicateEmail(email, userId)) {
-            request.setAttribute("error", "Email already exists");
-            request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
-            return;
-        }
-
-        if (!profileDAO.checkDuplicatePhone(phone, userId)) {
-            request.setAttribute("error", "Phone number already exists");
-            request.setAttribute("profile", profile);
-            request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
-            return;
+            if (!profileDAO.checkDuplicatePhone(phone, userId)) {
+                request.setAttribute("error", "Phone number already exists");
+                request.setAttribute("user", currentUser);
+                request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
+                return;
+            }
         }
 
         // Update profile
-        profile.setFirstName(firstName);
-        profile.setLastName(lastName);
-        profile.setPhone(phone);
-        profile.setEmail(email);
-        if (dobStr != null && !dobStr.isEmpty()) {
-            profile.setDateOfBirth(java.sql.Date.valueOf(dobStr));
-        }
-
         if (profileDAO.updateProfile(profile)) {
+            // Update session attributes
+            session.setAttribute("firstName", firstName);
+            session.setAttribute("lastName", lastName);
+
             request.setAttribute("success", "Profile updated successfully");
+            // Refresh user data
+            User updatedUser = UserDAO.getInstance().selectById(userId);
+            request.setAttribute("user", updatedUser);
         } else {
             request.setAttribute("error", "Failed to update profile");
+            request.setAttribute("user", currentUser);
         }
 
-        request.setAttribute("profile", profile);
         request.getRequestDispatcher("/static/user/profile.jsp").forward(request, response);
     }
 }
