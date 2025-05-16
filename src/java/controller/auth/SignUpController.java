@@ -6,14 +6,14 @@ import utils.Validation;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Timestamp;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import model.enums.UserRole;
 import dto.UserDTO;
 import java.util.UUID;
-import javax.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.WebServlet;
 import utils.Util;
 
 @WebServlet("/auth/sign-up")

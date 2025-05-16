@@ -1,0 +1,9 @@
+{
+  "java.configuration.detectJdksAtStart": true,
+  "java.configuration.runtimes": [],
+  "java.compile.nullAnalysis.nullable": [
+    "javax.annotation.Nullable",
+    "org.eclipse.jdt.annotation.Nullable",
+    "org.springframework.lang.Nullable"
+  ]
+}
